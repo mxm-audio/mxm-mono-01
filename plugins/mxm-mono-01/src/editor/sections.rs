@@ -682,9 +682,10 @@ pub fn paint(ui: &mut Ui, tokens: &Tokens, leaf: &Leaf, rect: Rect, live: &mut L
 
 /// Draws one section's body: its tree, shown in `ui`.
 ///
-/// The layout lab (`apps/mxm-layout-lab`) draws these real cards through this. `disclosed` is not
-/// read — the Advanced disclosure keeps its state in egui's memory under
-/// [`mxm_ui::shell::disclosure_id`] — and stays in the signature so that caller is unchanged.
+/// The layout lab (`apps/mxm-layout-lab`, in the private archive since the split) draws these real
+/// cards through this. `disclosed` is not read — the Advanced disclosure keeps its state in egui's
+/// memory under [`mxm_ui::shell::disclosure_id`] — and stays in the signature so that caller is
+/// unchanged.
 #[allow(clippy::too_many_arguments)]
 pub fn draw(
     ui: &mut Ui,
@@ -711,9 +712,9 @@ pub fn draw(
 /// One target's routes, drawn beneath the control they move.
 ///
 /// **Routing belongs under the thing it affects**, never in a detached footer — the ruling
-/// `plugins/mxm-mono-00/AGENTS.md` records and design system §7.4 makes normative. The rows and the
-/// `‹ modulate ›` menu come from `mxm_modulation_params`, so every editor in the collection draws
-/// this the same way.
+/// mxm-mono-00's `plugins/mxm-mono-00/AGENTS.md` records and design system §7.4 makes normative.
+/// The rows and the `‹ modulate ›` menu come from `mxm_modulation_params`, so every editor in the
+/// collection draws this the same way.
 fn routes(
     ui: &mut Ui,
     tokens: &Tokens,

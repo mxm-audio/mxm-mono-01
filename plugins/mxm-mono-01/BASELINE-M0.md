@@ -1,6 +1,6 @@
 # mxm-mono-01 — pre-conversion reference, captured at M0
 
-`plans/plan-modulation-routing.md` M0. **These figures stop existing once the conversion starts**,
+`plans/plan-modulation-routing.md` (in the private archive) M0. **These figures stop existing once the conversion starts**,
 which is why they are captured first and committed rather than re-derived later.
 
 Produced by `plugins/mxm-mono-01/src/lib.rs`'s `baseline` module:
@@ -9,7 +9,7 @@ Produced by `plugins/mxm-mono-01/src/lib.rs`'s `baseline` module:
 cargo test -p mxm-mono-01 --release baseline -- --ignored --nocapture
 ```
 
-Release only, as `crates/ui/tests/flow_resize_bench.rs` says of its own bench.
+Release only, as mxm-kit's `crates/ui/tests/flow_resize_bench.rs` says of its own bench.
 
 ## Throughput — the owner's cost gate
 
@@ -25,7 +25,7 @@ buffer plumbing, which is not where the routing work lands — said plainly rath
 | Spread over four runs | 205.95, 206.36, 206.37, 206.93 ns/sample — under 0.5 % |
 
 **Not portable across machines.** Windows development machine, `cargo` release profile; the same
-hedge `crates/mxm-bucket-delay-dsp/AGENTS.md` states for its own probe. What it is good for is a
+hedge mxm-bucket-delay's `crates/mxm-bucket-delay-dsp/AGENTS.md` states for its own probe. What it is good for is a
 before/after comparison **on this machine**, which is what the gate needs.
 
 **The claim it will be held to:** with the init patch loaded, throughput after the conversion is not
@@ -240,6 +240,8 @@ its sources and took its sums whether or not anything was live.
   owner's listening gate at M4 is not inferable from it.
 - **Nothing about the bundle or the host.** This is the library, in process. The player's own golden
   (`apps/mxm-player/tests/t4_golden_audio.rs`, digest `b0791ab43fe7c079`) covers the real bundle at
-  its defaults and must also not move.
+  its defaults and must also not move. *Since the split (2026-10-06):* that test is this
+  repository's `plugins/mxm-mono-01/host-tests/tests/golden_audio.rs`, same digest, pinned on
+  Windows only.
 - **Nothing about the other seven instruments.** Each captures its own baseline before its own
   conversion.

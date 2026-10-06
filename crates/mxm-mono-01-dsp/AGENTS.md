@@ -136,13 +136,16 @@ grep for the behaviour ([NOTES.md § Randomness](NOTES.md#randomness-is-determin
   paper — TPT/ZDF, PolyBLEP, Newton iteration. Where a cheaper design was tried and rejected, record
   the measured numbers that rejected it rather than the conclusion alone. `filter.rs` is the
   reference for this style.
-- Read the theory chapter before changing a module: `docs/filters/` for `filter.rs`,
-  `docs/modulation/` for the LFO and envelope, `docs/oscillators/` for `oscillator.rs` (links and
+- Read the theory chapter before changing a module: mxm-kit's
+  [`docs/filters/`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/filters/README.md) for `filter.rs`,
+  [`docs/modulation/`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/modulation/README.md) for the LFO and envelope,
+  [`docs/oscillators/`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/oscillators/README.md) for `oscillator.rs` (links and
   open gaps: [NOTES.md § Work Guidance](NOTES.md#work-guidance-the-theory-references)).
 - **Parameter smoothing is not this crate's** — keep that boundary.
-- A change to `oscillator.rs` means re-running `osc_spike` and updating the numbers it moves.
-- Do not extract shared filter or oscillator crates. Per the root contract, per-plugin DSP stays
-  per-plugin until a second instrument demonstrates a shared API.
+- A change to `oscillator.rs` means re-running `osc_spike` (in mxm-tools) and updating the numbers it moves.
+- Do not extract shared filter or oscillator crates. Per the monorepo root's contract (now mxm-kit's
+  [`collection-rules.md`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/collection-rules.md), *Don't pre-generalise*),
+  per-plugin DSP stays per-plugin until a second instrument demonstrates a shared API.
 - **Do not "fix" the resonance level loss**: a ladder's DC gain is `1/(1+k)` and ours tracks it;
   adding Q compensation would make it a Juno
   ([NOTES.md § `resonance_gain`](NOTES.md#resonance_gain-the-level-a-ladder-loses-to-resonance-is-right)).
@@ -175,16 +178,16 @@ Properties the tests must keep asserting, because each regresses silently:
 - the sawtooth's aliasing stays far below what a trivial modulo counter would produce, measured
   against an additive reference that validates the measurement inside the same test
 
-Three `examples/` cover what unit tests cannot, and `dsp-lab` gives the oscillator and modulation
-numbers (`osc_spike` **in release** — its cost figures are meaningless otherwise; `mod_spike`
+Three `examples/` cover what unit tests cannot, and `dsp-lab` (in mxm-tools, where its two
+commands below are run) gives the oscillator and modulation numbers (`osc_spike` **in release** — its cost figures are meaningless otherwise; `mod_spike`
 measures a generic smoothing model, see [NOTES.md § `mod_spike` and `osc_spike`](NOTES.md#mod_spike-and-osc_spike)):
 
 ```bash
 cargo run -p mxm-mono-01-dsp --release --example mono_01_filter_spike   # the filter's real numbers
 cargo run -p mxm-mono-01-dsp --example mono_01_render_demo              # WAV — does it sound like a synthesizer
 cargo run -p mxm-mono-01-dsp --release --example resonance_gain # does resonance cost the level theory says
-cargo run -p dsp-lab --release --example osc_spike
-cargo run -p dsp-lab --release --example mod_spike
+cargo run -p dsp-lab --release --example osc_spike    # in mxm-tools
+cargo run -p dsp-lab --release --example mod_spike    # in mxm-tools
 ```
 
 # Child DOX Index

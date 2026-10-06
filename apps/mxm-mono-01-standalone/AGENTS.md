@@ -8,18 +8,19 @@ Runs mxm-mono-01 with its real editor, outside a host. It is `src/main.rs` and n
 to nice-plug's `nice_export_standalone`, which supplies audio through cpal, MIDI through midir, and
 opens `Plugin::editor` in a window it owns.
 
-**It is no longer the only way to see the editor** — `apps/mxm-player` now opens it as a floating
-window. What this crate still gives you is the editor *without a host at all*: no plugin instance
+**It is no longer the only way to see the editor** — MXM Player (mxm-player's `apps/mxm-player`)
+now opens it as a floating window. What this crate still gives you is the editor *without a host at all*: no plugin instance
 lifecycle, no CLAP handshake, no host state to rule out when something looks wrong. That makes it
 the right place to work on the editor itself, and the wrong place to test hosting.
 
-The windowing is entirely in the vendored nice-plug, for all three platforms; this crate writes
-none of it.
+The windowing is entirely in the patched nice-plug (vendored until the split, now the MXM fork
+[mxm-audio/nice-plug](https://github.com/mxm-audio/nice-plug)), for all three platforms; this crate
+writes none of it.
 
 # Ownership
 
 Owns `src/main.rs` and `Cargo.toml`. Owns no interface: the editor belongs to
-[`plugins/mxm-mono-01`](../../plugins/AGENTS.md) and the controls to
+[`plugins/mxm-mono-01`](../../plugins/AGENTS.md) and the controls to mxm-kit's
 [`crates/ui`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/ui/AGENTS.md). **If this crate ever grows a widget, it is in the wrong
 place.**
 
@@ -28,10 +29,13 @@ place.**
 ## It is a separate crate on purpose, and outside `default-members`
 
 The obvious shape — a `[[bin]]` inside `plugins/mxm-mono-01` — is what nice-plug's own documentation
-suggests, and it is wrong here. The root `Cargo.toml` states the rule it would break:
+suggests, and it is wrong here. The monorepo's root `Cargo.toml` stated the rule it would break:
 
 > *"Kept for build time, NOT for MSRV: a plain `cargo build` should not pull in eframe, cpal and
 > midir."*
+
+This repository's root `Cargo.toml` says the same of its `default-members`: a plain `cargo build`
+never builds MXM Player or a standalone audio backend.
 
 `plugins/mxm-mono-01` **is** a default member. nice-plug's `standalone` feature adds eight crates —
 `clap`, `cpal`, `jack`, `midir`, `rtrb`, `fixed-resample`, `audioadapter-buffers`, `ctrlc` — and
@@ -39,13 +43,15 @@ suggests, and it is wrong here. The root `Cargo.toml` states the rule it would b
 whether or not anyone runs JACK. A bin in the plugin would put all of that into the shipped
 `.clap`.
 
-So this crate mirrors `apps/mxm-player`: a separate member, excluded from `default-members`.
+So this crate mirrors `apps/mxm-player` (now in mxm-player): a separate member, excluded from
+`default-members`.
 `plugins/mxm-mono-01` gains only `crate-type = ["cdylib", "lib"]` and no dependencies.
 
 **Cargo unifies features across a single build graph**, so this is a property of *which* crates are
 built together, not a wall. `cargo build --workspace` does include this crate. The check is
 `cargo tree -p mxm-mono-01`, which must show no audio backend — run it by hand when this crate or
-the plugin's dependencies change, since no CI is used (root *Windows, Linux and macOS*) —
+the plugin's dependencies change, since CI does not run it and runs only on release tags (root
+*Windows, Linux and macOS*) —
 because the failure mode is silent: the bundle would still build, still load and still work, while
 carrying cpal and a libjack link into every user's DAW.
 
@@ -53,8 +59,8 @@ carrying cpal and a libjack link into every user's DAW.
 
 `libjack-jackd2-dev`. The `jack` crate is taken with default features, so it links rather than
 loading at runtime. If that becomes awkward on a runner, the alternative is the crate's
-runtime-loading path — but that is a change to a vendored dependency's feature set, so it is a
-decision, not a fix to apply quietly.
+runtime-loading path — but that is a change to a patched dependency's feature set (the nice-plug
+fork's), so it is a decision, not a fix to apply quietly.
 
 ## What running the editor here proves, and what it does not
 
@@ -80,7 +86,8 @@ product. Run `cargo xtask bundle mxm-mono-01 --release` before believing the plu
 Nothing in this repository used nice-plug's standalone path before M4b, and the copy in
 [`vendor/nice-plug`](https://github.com/mxm-audio/nice-plug/blob/main/PATCHES.md) is patched. A failure here is as likely to be the
 wrapper as the editor — check `vendor/nice-plug/src/wrapper/standalone/` before assuming the
-editor is at fault.
+editor is at fault. *Since the split (2026-10-06):* there is no `vendor/`; the patched copy is the
+MXM fork, and the folder to check is its `src/wrapper/standalone/`.
 
 # Work Guidance
 

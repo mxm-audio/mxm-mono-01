@@ -1,7 +1,7 @@
 //! What the routing does to mxm-mono-01's voice, and what it must not do.
 //!
 //! `plans/plan-modulation-routing.md` §10. The shared layer's own contracts are proved in
-//! `crates/mxm-modulation/tests/contracts.rs`; these are the instrument's.
+//! mxm-kit's `crates/mxm-modulation/tests/contracts.rs`; these are the instrument's.
 
 use mxm_mono_01_dsp::routing::{FULL_SCALE, Graph, Routing, source, target};
 use mxm_mono_01_dsp::voice::{NoteId, Patch, Retrigger, Voice};

@@ -49,8 +49,8 @@ envelope and filter displays of [its brief](../../docs/briefs/mxm-mono-01.md), a
 preset browser, the output level beside its meter, and the scale and theme controls.
 
 Validated in the standalone harness and as a floating editor in MXM Player on Windows. **A real DAW —
-embedded hosting, host-driven resize and scale — is a recorded unmet gate**, and Linux and macOS are
-unverified.
+embedded hosting, host-driven resize and scale — is a recorded unmet gate**, and on Linux and macOS
+the editor has not been opened by hand (CI builds and tests all three platforms on a release tag).
 
 ## Building
 
@@ -60,4 +60,4 @@ clap-validator validate "target/bundled/mxm-mono-01.clap"
 cargo run -p mxm-mono-01-standalone      # the editor with no host at all
 ```
 
-MIT licensed — see [LICENSE](LICENSE). All code is original.
+GPL-3.0-or-later — see the repository's [`LICENSE`](../../LICENSE). All code is original.

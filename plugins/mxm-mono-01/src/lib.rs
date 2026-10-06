@@ -37,8 +37,9 @@ pub const NAME: &str = plugin_name!();
 /// decision.
 pub const CLAP_ID: &str = concat!("dk.mxm.", plugin_name!());
 
-// Public for `apps/mxm-layout-lab` on the `dynamic-layout` branch: the lab draws these real
-// cards outside a host. Nothing else about them changes, and the shipped cdylib is unaffected.
+// Public for `apps/mxm-layout-lab` (in the private archive since the split) on the
+// `dynamic-layout` branch: the lab draws these real cards outside a host. Nothing else about them
+// changes, and the shipped cdylib is unaffected.
 pub mod editor;
 pub mod params;
 pub mod preset;
@@ -164,7 +165,7 @@ impl MxmMono01 {
     /// **A measurement seam, not a second `process()`.** It runs exactly the loop `process()` runs —
     /// `next_patch()` per sample, which advances every smoother and rebuilds the `Patch`, then
     /// `Voice::process` — and it deliberately omits the wrapper's per-block event handling and
-    /// buffer plumbing, which are not what the modulation work lands on. `plugins/mxm-shimmer`,
+    /// buffer plumbing, which are not what the modulation work lands on. `mxm-shimmer`,
     /// `mxm-grain-fx` and `mxm-bucket-delay` carry the same `_for_test` shape for the same reason.
     ///
     /// It exists because `plans/plan-modulation-routing.md`'s cost gate must measure the **plugin**
@@ -566,7 +567,8 @@ nice_export_clap!(MxmMono01);
 mod upstream_defects {
     use super::*;
 
-    /// Pins the arithmetic behind the upstream nice-plug defect in `docs/known-issues.md`.
+    /// Pins the arithmetic behind the upstream nice-plug defect in mxm-kit's
+    /// `docs/known-issues.md`.
     ///
     /// The wrapper's `input_events` is a `VecDeque::with_capacity(512)` that grows inside
     /// `process()`. The allocation it fails on is 20480 bytes, which is only meaningful if
@@ -836,16 +838,16 @@ mod developer_channel_tests {
 ///
 /// **Both figures stop existing the moment the conversion starts**, which is why they are taken
 /// first and recorded rather than re-derived later. Neither is an assertion: they print, and the
-/// numbers go into the plan's revision table and this crate's AGENTS.md with the machine named,
+/// numbers go into the plan's revision table and this crate's NOTES.md with the machine named,
 /// because a cost probe is reproducible on one machine and not portable across machines —
-/// `crates/mxm-bucket-delay-dsp/AGENTS.md` already states that hedge for its own figure.
+/// mxm-bucket-delay's `crates/mxm-bucket-delay-dsp/AGENTS.md` states that hedge for its own figure.
 ///
 /// ```bash
 /// cargo test -p mxm-mono-01 --release baseline -- --ignored --nocapture
 /// ```
 ///
-/// **Release, or the numbers mean nothing**, exactly as `crates/ui/tests/flow_resize_bench.rs` says
-/// of its own bench.
+/// **Release, or the numbers mean nothing**, exactly as mxm-kit's
+/// `crates/ui/tests/flow_resize_bench.rs` says of its own bench.
 #[cfg(test)]
 mod baseline {
     use super::*;
@@ -855,7 +857,7 @@ mod baseline {
     const FS: f32 = 48_000.0;
     const BLOCK: usize = 64;
 
-    /// A plugin with every smoother activated, which is gotcha 13 in
+    /// A plugin with every smoother activated, which is gotcha 13 in mxm-kit's
     /// `docs/adding-an-instrument.md`: nice-plug initialises a smoother in `activate`, not in
     /// `FloatParam::new`, so without this every smoothed parameter reads zero and the measurement
     /// is of the wrong thing.

@@ -2,6 +2,9 @@
 
 The detail behind this folder's AGENTS.md: history, measurements, rationale and worked examples. AGENTS.md is the contract; this file is the reference it links to.
 
+*Since the split (2026-10-06):* the `plans/` cited below are the design history, in the private
+archive.
+
 ## Permanent identifiers
 
 **`CLAP_ID` has been changed once, and will not be again.** MXM-101 became `mxm-mono-01` while the
@@ -59,7 +62,7 @@ The Oscillator's embedded performance controls stay on its indivisible Generator
 quarter-4K content and minimum sizes; component row proofs remain. Native DPI, user inspection and
 DAW gates remain open.
 
-**Every card is a `mxm_ui::tree`** (`crates/ui/AGENTS.md`, *A card body as data*).
+**Every card is a `mxm_ui::tree`** (mxm-kit's [`crates/ui/AGENTS.md`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/ui/AGENTS.md), *A card body as data*).
 `sections::card` describes a card's body once — the collection's knob rows (`tree::knob_row`), the
 switches, the shape rows, the sliders, the route stacks, the three displays — and that one
 description is measured for the card's floor and height and drawn leaf by leaf through the same
@@ -78,7 +81,7 @@ layout's: the body's `SPACE_3` rhythm, with the `add_space` it put on top as pad
   reserves its body open, so opening it never grows the card or moves anything outside it; the
   routes under it move down into the room at the card's foot. Its body sits in a row that spans the
   card, so the separator over it does.
-- `sections::draw` stays for `apps/mxm-layout-lab`, with its signature: it builds the section's tree
+- `sections::draw` stays for `apps/mxm-layout-lab` (in the private archive since the split), with its signature: it builds the section's tree
   and shows it, and its `disclosed` argument is no longer read.
 - `every_card_passes_the_tree_checks_in_every_state` runs `mxm_plugin_test::tree_checks` over every
   card at Init, with Advanced open, with every route revealed at full negative depth (closed and
@@ -253,7 +256,7 @@ smoothers and the per-sample `Patch` rebuild — and a framework-free bench cann
 round caught the plan pointing this measurement at the wrong layer.
 
 **The figure is reproducible on this machine and not portable off it**, the hedge
-`crates/mxm-bucket-delay-dsp/AGENTS.md` already states for its own probe. Its use is the before/after
+mxm-bucket-delay's `crates/mxm-bucket-delay-dsp/AGENTS.md` already states for its own probe. Its use is the before/after
 comparison, which is the owner's stated cost gate.
 
 ## Every parameter's text survives the host's round trip

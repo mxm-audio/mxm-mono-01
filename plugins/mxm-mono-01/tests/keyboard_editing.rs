@@ -1,8 +1,8 @@
 //! The keyboard cursor, driven through mxm-mono-01's real editor.
 //!
-//! `crates/ui`'s own tests prove the cursor's arithmetic against a synthetic registry. This proves
-//! the half that only exists once a real panel has drawn: that controls register themselves, that
-//! the cursor reaches them, that a bare arrow moves the selected parameter by its own step, and
+//! mxm-kit's `crates/ui` tests prove the cursor's arithmetic against a synthetic registry. This
+//! proves the half that only exists once a real panel has drawn: that controls register themselves,
+//! that the cursor reaches them, that a bare arrow moves the selected parameter by its own step, and
 //! that a held key is one automation gesture rather than a hundred.
 //!
 //! Layout is not asserted here. Which card a knob lands on depends on the width the pack chose,

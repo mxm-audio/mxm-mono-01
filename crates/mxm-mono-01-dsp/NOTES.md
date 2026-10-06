@@ -2,10 +2,15 @@
 
 The detail behind this folder's AGENTS.md: history, measurements, rationale and worked examples. AGENTS.md is the contract; this file is the reference it links to.
 
+*Since the split (2026-10-06):* `docs/filters/`, `docs/oscillators/`, `docs/modulation/` and
+`mxm-measure` are in [mxm-kit](https://github.com/mxm-audio/mxm-kit), `dsp-lab` (with the `../dsp-lab/`
+paths below) is in [mxm-tools](https://github.com/mxm-audio/mxm-tools), and the `plans/` cited here
+are in the private archive.
+
 ## Ownership: the spikes live in dsp-lab
 
 The measurement harnesses behind `docs/oscillators/` and `docs/modulation/` — `osc_spike.rs` and
-`mod_spike.rs` — live in [`../dsp-lab/`](https://github.com/mxm-audio/mxm-tools/blob/main/crates/dsp-lab/AGENTS.md), because they serve
+`mod_spike.rs` — live in mxm-tools' [`crates/dsp-lab/`](https://github.com/mxm-audio/mxm-tools/blob/main/crates/dsp-lab/AGENTS.md), because they serve
 collection-level references rather than this plugin. The examples that remain here all verify
 *this* crate's shipped DSP.
 
@@ -131,7 +136,7 @@ genuinely portable — it is a claim about the shipped graph, checkable with
 `[dependencies]` holds **`mxm-modulation` and nothing else**: zero dependencies of its own, at this
 same floor, so it costs the portability claim nothing. `[dev-dependencies]` holds **`mxm-measure`**,
 the collection's measurement rulers, on the same terms — a test-only edge, never in a shipped `.clap`,
-which [`../mxm-measure/AGENTS.md`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/mxm-measure/AGENTS.md)'s verification section checks rather
+which mxm-kit's [`crates/mxm-measure/AGENTS.md`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/mxm-measure/AGENTS.md)'s verification section checks rather
 than asserts. It also holds `mxm-audio-file` and `mxm-audio-file-decode`, for the render demo's write
 and its read-back test, on the same test-only terms. Anything that would need a dependency either does not belong here or
 gets written here — `Rng` in `lib.rs` is the precedent.
@@ -211,7 +216,7 @@ a Juno: same IR3109, but the Juno's external circuit has Q compensation and the 
 ### `mod_spike` and `osc_spike`
 
 The oscillator and modulation numbers come from `dsp-lab` (`osc_spike` and `mod_spike`; the
-commands are in AGENTS.md's Verification).
+commands are in AGENTS.md's Verification, and run in mxm-tools).
 
 `mod_spike` does the same for `lfo.rs` and `envelope.rs`; its §4 measures a *generic* smoothing
 model rather than the plugin's, because smoothing is plugin-owned and this crate cannot depend on

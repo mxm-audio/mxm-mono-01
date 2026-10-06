@@ -3,6 +3,10 @@
 Required by `MXM_DESIGN_SYSTEM.md` §14, written before implementation. Answers the ten questions in
 order, then records the two deliberate deviations from the system.
 
+*Since the split (2026-10-06):* the design system is mxm-kit's
+[`docs/MXM_DESIGN_SYSTEM.md`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/MXM_DESIGN_SYSTEM.md),
+and MXM Player is its own repository, [mxm-player](https://github.com/mxm-audio/mxm-player).
+
 **Instrument:** monophonic subtractive synthesizer. Architecture inspired by the Roland SH-101; the
 interface is not.
 
@@ -304,7 +308,7 @@ stack would duplicate that and can behave confusingly when the two histories dis
 
 **Decision:** no app-bar undo/redo in v1. This is revisited when an MXM instrument gains genuinely
 plugin-local undoable actions — preset editing, modulation assignment, or destructive operations —
-at which point it belongs in `crates/ui` for the whole collection rather than in one plugin.
+at which point it belongs in mxm-kit's `crates/ui` for the whole collection rather than in one plugin.
 
 ### No preset *browser* (§3.1), but there is an Init action
 
@@ -345,9 +349,10 @@ When it arrives it takes slots 2–4 and Init moves beside the preset actions.
 - **Standalone-validated.** Everything above, through `apps/mxm-mono-01-standalone`.
 - **Floating-host-validated, on Windows.** `apps/mxm-player` opens the editor as a floating window
   the plugin owns: `create`, `show`, `destroy`, and reopening afterwards. Linux and macOS build in
-  CI and are **UNVERIFIED**.
+  CI and are **UNVERIFIED**. *Since the split (2026-10-06):* CI builds and tests all three on a
+  release tag; the floating editor has still not been opened on Linux or macOS.
 - **Embedded-host-validated — UNMET.** Host parenting, host-driven resize and scale changes never
   run: the player hosts floating windows only, and embedding is unsupported. So is
-  **third-party floating hosting** — the vendored nice-plug now advertises floating to *every*
+  **third-party floating hosting** — the vendored nice-plug (the MXM fork since the split) now advertises floating to *every*
   host, and `get_preferred_api` is only a hint a DAW may ignore, so a DAW may take that path. There
   is no DAW here to find out.

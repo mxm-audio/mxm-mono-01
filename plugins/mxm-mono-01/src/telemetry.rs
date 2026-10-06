@@ -2,9 +2,10 @@
 //!
 //! # The contract, and why it is a struct rather than a convention
 //!
-//! `plugins/AGENTS.md` states it: *"DSP → editor telemetry uses atomics or a triple buffer, never
-//! a mutex read by the audio thread, and may drop frames."* A rule written only in prose is a rule
-//! each new visualization re-derives, so it is expressed here as the only channel that exists.
+//! mxm-kit's `docs/plugin-conventions.md` (linked from `plugins/AGENTS.md`) states it: *"DSP →
+//! editor telemetry uses atomics or a triple buffer, never a mutex read by the audio thread, and
+//! may drop frames."* A rule written only in prose is a rule each new visualization re-derives, so
+//! it is expressed here as the only channel that exists.
 //!
 //! One [`Telemetry`], `Arc`-shared: the plugin owns it, the editor holds a clone. **The audio
 //! thread writes; the UI thread reads.** No locks, no allocation, and nothing here is on a path

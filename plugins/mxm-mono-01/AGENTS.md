@@ -13,9 +13,9 @@ this plugin**; the history, measurements and worked examples behind it are in [N
 
 # Ownership
 
-`Cargo.toml`, `LICENSE`, `README.md`, `BASELINE-M0.md`, `control-map.json`, `presets/`, `tests/`,
+`Cargo.toml`, `README.md`, `BASELINE-M0.md`, `control-map.json`, `presets/`, `tests/`,
 and `src/` — `lib.rs`, `params.rs`, `preset.rs`, `routes.rs`, `telemetry.rs`, and `editor.rs` with
-its `editor/{binding, sections, visuals}.rs`.
+its `editor/{binding, sections, visuals}.rs`. Its licence is the repository's root `LICENSE`.
 
 # Local Contracts
 
@@ -36,7 +36,7 @@ smoothed: a time constant, not a signal ([NOTES.md § Glide](NOTES.md#glide-is-a
 
 ## `preset.rs` owns this product’s `Instrument` implementation
 
-The shared system is `crates/mxm-preset`; this file owns the `Instrument` implementation and fifty
+The shared system is mxm-kit's `mxm-preset`; this file owns the `Instrument` implementation and fifty
 categorized factory presets in `presets/`, generated from test-module `FACTORY_DESIGN`.
 
 ## The editor, and its brief
@@ -64,7 +64,8 @@ editor*): with `MXM_DEV_CC` in the process environment, CC 119 selects a categor
   size (`visuals::panel_height`), route stacks theirs (`mxm_modulation_params::ui::stack_size`).
 - **The Advanced disclosure's state is egui's** (`disclosure_id("Advanced")`, CC 118 through
   `editor::set_advanced`); its body is reserved open, so opening it never grows the card.
-- `sections::draw` keeps its signature for `apps/mxm-layout-lab`; `disclosed` is no longer read.
+- `sections::draw` keeps its signature for `apps/mxm-layout-lab` (in the private archive since the
+  split); `disclosed` is no longer read.
 - `every_card_passes_the_tree_checks_in_every_state`: every card at Init, Advanced open, every route
   at full negative depth, and a note sounding.
 
@@ -156,7 +157,7 @@ init patch at zero depth** (the owner's ruling;
   defects recorded in [`docs/known-issues.md`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/known-issues.md), so the recorded diagnosis cannot go stale
   silently. If it fails, recheck the diagnosis before changing the number.
 - **`editor`, `params` and `telemetry` are public**, with the `Section` enum, its `SECTIONS`,
-  `title()` and the card grouping, **permanently**, so `apps/mxm-layout-lab` draws these real cards
+  `title()` and the card grouping, **permanently**, so `apps/mxm-layout-lab` (private archive) draws these real cards
   ([NOTES.md § `editor`, `params` and `telemetry`](NOTES.md#editor-params-and-telemetry-are-public)).
 - **Activation refuses a rate the DSP cannot hold**: `activate` returns `false`, before anything
   changes, for a non-finite rate or one below `mxm_mono_01_dsp::MIN_SAMPLE_RATE`
@@ -179,7 +180,8 @@ clap-validator validate "target/bundled/mxm-mono-01.clap"
 cargo run -p mxm-mono-01-standalone      # the editor with no host at all
 ```
 
-**A real DAW at a small buffer size is a recorded-unmet gate** — see the parent, and
+**A real DAW at a small buffer size is a recorded-unmet gate** — see the conventions' *Verification*
+the parent links to, and
 [`docs/briefs/mxm-mono-01.md`](../../docs/briefs/mxm-mono-01.md)'s three claims.
 
 # Child DOX Index
