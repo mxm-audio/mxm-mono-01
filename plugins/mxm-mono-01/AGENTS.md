@@ -153,7 +153,7 @@ init patch at zero depth** (the owner's ruling;
   `params::tests::every_parameter_reads_the_same_after_the_hosts_round_trip`
   ([NOTES.md § Every parameter's text](NOTES.md#every-parameters-text-survives-the-hosts-round-trip)).
 - **The upstream-defect test**: `upstream_defects` pins the arithmetic behind one of the nice-plug
-  defects recorded in [`docs/known-issues.md`](https://github.com/mxm-audio/newdawn-workspace/blob/main/docs/known-issues.md), so the recorded diagnosis cannot go stale
+  defects recorded in [`docs/known-issues.md`](https://github.com/mxm-audio/mxm-kit/blob/main/docs/known-issues.md), so the recorded diagnosis cannot go stale
   silently. If it fails, recheck the diagnosis before changing the number.
 - **`editor`, `params` and `telemetry` are public**, with the `Section` enum, its `SECTIONS`,
   `title()` and the card grouping, **permanently**, so `apps/mxm-layout-lab` draws these real cards

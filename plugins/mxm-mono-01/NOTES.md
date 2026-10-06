@@ -274,7 +274,7 @@ failed it before the fix, and every route amount before its readings.
 ## `editor`, `params` and `telemetry` are public
 
 They are `pub`, with the `Section` enum, its `SECTIONS`, `title()` and the card grouping the flow
-reads, so [`apps/mxm-layout-lab`](https://github.com/mxm-audio/newdawn-workspace/blob/main/apps/mxm-layout-lab/AGENTS.md) can draw **these real cards**
+reads, so `apps/mxm-layout-lab` (`apps/mxm-layout-lab/AGENTS.md` in the private archive) can draw **these real cards**
 on its bench instead of copying the section code, which would then drift.
 
 It began as a branch-only change for that lab and **is now permanent**, because the reflowing layout

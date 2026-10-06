@@ -78,7 +78,7 @@ product. Run `cargo xtask bundle mxm-mono-01 --release` before believing the plu
 ## The wrapper is unproven ground
 
 Nothing in this repository used nice-plug's standalone path before M4b, and the copy in
-[`vendor/nice-plug`](https://github.com/mxm-audio/newdawn-workspace/blob/main/vendor/AGENTS.md) is patched. A failure here is as likely to be the
+[`vendor/nice-plug`](https://github.com/mxm-audio/nice-plug/blob/main/PATCHES.md) is patched. A failure here is as likely to be the
 wrapper as the editor — check `vendor/nice-plug/src/wrapper/standalone/` before assuming the
 editor is at fault.
 
