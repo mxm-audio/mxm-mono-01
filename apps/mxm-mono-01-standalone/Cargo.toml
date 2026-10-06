@@ -1,0 +1,23 @@
+[package]
+name = "mxm-mono-01-standalone"
+description = "Runs mxm-mono-01 with its editor, outside a host"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "mxm-mono-01-standalone"
+path = "src/main.rs"
+
+[dependencies]
+# The `standalone` feature is what makes this crate exist separately. It adds eight crates -
+# clap, cpal, jack, midir, rtrb, fixed-resample, audioadapter-buffers and ctrlc - and
+# `wrapper/standalone/backend.rs` declares `mod jack;` unconditionally, so enabling it inside
+# `plugins/mxm-mono-01` would put an audio backend and a JACK link dependency into the shipped
+# `.clap`. This crate is outside `default-members` for the same reason `apps/mxm-player` is.
+nice-plug = { workspace = true, features = ["standalone"] }
+mxm-mono-01 = { path = "../../plugins/mxm-mono-01" }

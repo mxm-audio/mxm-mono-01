@@ -1,0 +1,50 @@
+[package]
+name = "mxm-mono-01"
+description = "Monophonic subtractive synthesizer, architecture inspired by the SH-101"
+version.workspace = true
+edition.workspace = true
+# Raised at M4b: the editor pulls in egui, which declares 1.95. `mxm-mono-01-dsp` stays at 1.87 and
+# must not be dragged up with it - the editor depends on the DSP, not the reverse.
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+# `lib` as well as `cdylib`: the shipped artifact is the `cdylib`, and the `lib` is what lets
+# `apps/mxm-mono-01-standalone` link the plugin to run its editor outside a host. Adding it changes
+# nothing about the bundle and pulls in no dependencies.
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+nice-plug.workspace = true
+nice-plug-egui.workspace = true
+mxm-ui.workspace = true
+mxm-preset.workspace = true
+mxm-tempo.workspace = true
+egui.workspace = true
+mxm-mono-01-dsp.workspace = true
+mxm-modulation.workspace = true
+mxm-modulation-params.workspace = true
+
+# Presets, per `plans/plan-presets.md` §5. A preset file is **user-editable**, so it will arrive
+# malformed, and hand-rolled parsing of hand-edited text is where the bugs live. That is the opposite
+# of `sequencer::smf`, whose input is machine-written and whose format is fixed — the precedent
+# points the other way and is named here so the difference is a decision rather than an oversight.
+#
+# `dirs` because presets live under the user's config directory: a plugin is never told the path its
+# `.clap` was loaded from, and a directory beside the bundle is not writable on every install.
+#
+# All three pin exactly and are already resolved in the workspace lock file, so nothing new enters it.
+
+[dev-dependencies]
+# The collection's shared headless checks (`crates/mxm-plugin-test`).
+mxm-plugin-test.workspace = true
+# `wgpu` renders a frame to pixels for the layout-tree review pictures
+# (`mxm_plugin_test::tree_checks`, `tree_pictures`). Test-only: nothing here reaches the bundle.
+egui_kittest = { version = "=0.36.1", features = ["wgpu"] }
+image = { version = "=0.25.9", default-features = false, features = ["png"] }
+# The modulation standard's checks (`mxm_plugin_test::routing_checks`): the route parameters are
+# held to the DSP's own declaration. Test-only features, so the bundle carries neither.
+mxm-modulation = { workspace = true, features = ["conformance"] }
+mxm-mono-01-dsp = { workspace = true, features = ["conformance"] }
