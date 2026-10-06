@@ -50,7 +50,7 @@ preset browser, the output level beside its meter, and the scale and theme contr
 
 Validated in the standalone harness and as a floating editor in MXM Player on Windows. **A real DAW —
 embedded hosting, host-driven resize and scale — is a recorded unmet gate**, and on Linux and macOS
-the editor has not been opened by hand (CI builds and tests all three platforms on a release tag).
+the editor has not been opened by hand (CI builds and tests all three platforms on a `v*` tag).
 
 ## Building
 
