@@ -519,12 +519,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1254ebf6529f3763c491acfb5ab6e960809e3c75a38584cc664f8c5667fb7107"
 
 [[package]]
-name = "audio-core"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f93ebbf82d06013f4c41fe71303feb980cddd78496d904d06be627972de51a24"
-
-[[package]]
 name = "audio_thread_priority"
 version = "0.35.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -539,19 +533,15 @@ dependencies = [
 
 [[package]]
 name = "audioadapter"
-version = "4.0.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c75c3943c6c7279bb25a449a8d1727480730ab2efd7b6fd5d6ca51927096e6e4"
-dependencies = [
- "audio-core",
- "num-traits",
-]
+checksum = "d1292ef9edf681b7426ed089004b021a42896492f58bd0c909ad44e5faec9ac4"
 
 [[package]]
 name = "audioadapter-buffers"
-version = "4.0.0"
+version = "5.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ece3390b6eb40379094843a1da5aaccc34bc0d85a8cbf68d09fe092fee6de29e"
+checksum = "46289a81a3bfa26d0f8b2415f8ca9decde9a66308a150568af5c102381b3c8ce"
 dependencies = [
  "audioadapter",
  "audioadapter-sample",
@@ -560,11 +550,11 @@ dependencies = [
 
 [[package]]
 name = "audioadapter-sample"
-version = "4.0.0"
+version = "5.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1592f90413568e259413c21a41a3d571feb1774255c209e7966d98f9db708c90"
+checksum = "5258faecf4edbe35ec483bda9b1f7438e6b391891819269c6b5461aeaa0e8d7d"
 dependencies = [
- "audio-core",
+ "audio-codec-algorithms",
  "num-traits",
 ]
 
@@ -591,9 +581,9 @@ dependencies = [
 
 [[package]]
 name = "baseview"
-version = "0.3.2"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69412dad79c1ed7a3f6960eda3707a31f1407a384bc6d49bc133624b347ac185"
+checksum = "b5e6c757ec03e84908c3f57cd1442279c9786d40f5a9f398e1181726db973e16"
 dependencies = [
  "block2 0.6.2",
  "bytemuck",
@@ -601,6 +591,7 @@ dependencies = [
  "dispatch2",
  "dpi",
  "keyboard-types",
+ "libloading 0.8.9",
  "objc2 0.6.4",
  "objc2-app-kit 0.3.2",
  "objc2-core-foundation",
@@ -1404,8 +1395,8 @@ dependencies = [
 
 [[package]]
 name = "egui-baseview"
-version = "0.7.0"
-source = "git+https://github.com/mxm-audio/egui-baseview?tag=0.7.0-mxm.1#dfb8328a08a2da053d756bffa451ccb9ee806c52"
+version = "0.7.2"
+source = "git+https://github.com/mxm-audio/egui-baseview?tag=0.7.2-mxm.1#5fde473da5fc04c92279208d2309c8c28a49e030"
 dependencies = [
  "baseview",
  "copypasta",
@@ -1669,9 +1660,9 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
 name = "fixed-resample"
-version = "0.12.1"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3505607cc0adc388ce98f59707477c02fbd05a2fa0c1b8c4cf42b71a3cb9c34"
+checksum = "4d1870ecdc0221202c6fb0c8205a6a38878231f13fc9d389c1d9f2b9d2906bd3"
 dependencies = [
  "audioadapter",
  "audioadapter-buffers",
@@ -2552,8 +2543,8 @@ dependencies = [
 
 [[package]]
 name = "mxm-audio-file"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "aifc",
  "flacenc",
@@ -2562,16 +2553,16 @@ dependencies = [
 
 [[package]]
 name = "mxm-audio-file-decode"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "symphonia",
 ]
 
 [[package]]
 name = "mxm-control-map"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "serde",
  "serde_json",
@@ -2579,18 +2570,18 @@ dependencies = [
 
 [[package]]
 name = "mxm-measure"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 
 [[package]]
 name = "mxm-modulation"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 
 [[package]]
 name = "mxm-modulation-params"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "egui",
  "mxm-modulation",
@@ -2649,7 +2640,7 @@ dependencies = [
 [[package]]
 name = "mxm-player"
 version = "0.1.0"
-source = "git+https://github.com/mxm-audio/mxm-player?tag=v0.1.2#4a172969a05bd62db1ad43b6a630340b1f2de6a6"
+source = "git+https://github.com/mxm-audio/mxm-player?tag=v0.2.0#141e9a21ee455b47f4dd14e100691efce3b989a8"
 dependencies = [
  "clack-extensions",
  "clack-host",
@@ -2665,7 +2656,7 @@ dependencies = [
  "mxm-control-map",
  "mxm-ui",
  "raw-window-handle",
- "rtrb",
+ "rtrb 0.3.5",
  "serde",
  "serde_json",
  "walkdir",
@@ -2674,21 +2665,21 @@ dependencies = [
 
 [[package]]
 name = "mxm-player-harness"
-version = "0.1.0"
-source = "git+https://github.com/mxm-audio/mxm-player?tag=v0.1.2#4a172969a05bd62db1ad43b6a630340b1f2de6a6"
+version = "0.2.0"
+source = "git+https://github.com/mxm-audio/mxm-player?tag=v0.2.0#141e9a21ee455b47f4dd14e100691efce3b989a8"
 dependencies = [
  "clack-extensions",
  "clack-host",
  "egui",
  "egui_kittest",
  "mxm-player",
- "rtrb",
+ "rtrb 0.3.5",
 ]
 
 [[package]]
 name = "mxm-plugin-test"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "egui",
  "egui_kittest",
@@ -2700,8 +2691,8 @@ dependencies = [
 
 [[package]]
 name = "mxm-preset"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "dirs",
  "egui",
@@ -2714,13 +2705,13 @@ dependencies = [
 
 [[package]]
 name = "mxm-tempo"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 
 [[package]]
 name = "mxm-ui"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "dirs",
  "egui",
@@ -2730,8 +2721,8 @@ dependencies = [
 
 [[package]]
 name = "mxm-xtask"
-version = "0.3.1"
-source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.3.1#e3f5064b800e471c0e0e0edfd8489ae75115c2b0"
+version = "0.4.0"
+source = "git+https://github.com/mxm-audio/mxm-kit?tag=v0.4.0#06cbc3e373ccd4e5c7a7f992f7f6ffede2844324"
 dependencies = [
  "anyhow",
  "mxm-control-map",
@@ -2828,8 +2819,8 @@ dependencies = [
 
 [[package]]
 name = "nice-plug"
-version = "0.3.0"
-source = "git+https://github.com/mxm-audio/nice-plug?tag=0.3.0-mxm.1#ba34543e40d58013e90e63a5aae5d12bc0328bd8"
+version = "0.4.2"
+source = "git+https://github.com/mxm-audio/nice-plug?tag=0.4.2-mxm.1#92f8c6ac332355796bf85fe8104c086f26c0ae68"
 dependencies = [
  "anyhow",
  "anymap3",
@@ -2855,18 +2846,19 @@ dependencies = [
  "objc2 0.6.4",
  "parking_lot",
  "raw-window-handle",
- "rtrb",
+ "rtrb 0.4.0",
  "serde_json",
  "thiserror 2.0.20",
  "tracing",
+ "try-lock",
  "windows",
 ]
 
 [[package]]
 name = "nice-plug-core"
-version = "0.3.0"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3efe28c7689d970d8ebe9afec813895ace1fdb544fb50f79122ccc1ee6dca54b"
+checksum = "ab8fe3f3e395c1140d7519a78069b59b2e3bf6da2b904d0c54ad7ab49a60ba09"
 dependencies = [
  "atomic_float",
  "atomic_refcell",
@@ -2880,6 +2872,7 @@ dependencies = [
  "raw-window-handle",
  "serde",
  "serde_json",
+ "thiserror 2.0.20",
  "tracing",
 ]
 
@@ -2896,9 +2889,9 @@ dependencies = [
 
 [[package]]
 name = "nice-plug-egui"
-version = "0.4.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be992a08bb4413b683bc48752adf92b8540541e885fd4e6401957d9b768e6f4f"
+checksum = "3fcf7478a8ceedb1658e0de4f1548488807f177a962727c54753d78d649f9472"
 dependencies = [
  "crossbeam",
  "egui",
@@ -3843,6 +3836,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fae8ee26b0371a29a77d2b2d6b3ae13aa81def6f9bf1b1b92a32d279a5e709b7"
 
 [[package]]
+name = "rtrb"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9278fb35b3e730abe136e9b395b5b81b96d06b9f5478a50f0c8430a2237b22de"
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4669,6 +4668,12 @@ dependencies = [
  "thread_local",
  "tracing-core",
 ]
+
+[[package]]
+name = "try-lock"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "type-map"
