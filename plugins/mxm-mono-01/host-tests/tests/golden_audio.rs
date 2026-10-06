@@ -41,6 +41,12 @@ const PLUGIN: &str = "dk.mxm.mxm-mono-01";
 /// here as evidence about the filter's resonance behaviour: it is not.
 const GOLDEN_DIGEST: &str = "b0791ab43fe7c079";
 
+/// Whether this platform's render can match the pinned digests. They are Windows': each platform's
+/// maths library rounds in its own way, so the same score renders different bits on Linux and macOS.
+/// The owner pinned them on Windows only, where the sound was recorded and approved (2026-10-06);
+/// elsewhere every other check in these tests still runs.
+const DIGESTS_PINNED_HERE: bool = cfg!(target_os = "windows");
+
 /// How many samples the score renders. Guards against a change that alters length rather than
 /// content — a shorter render with a matching prefix would otherwise slip through.
 const GOLDEN_SAMPLES: usize = 45 * mxm_player::session::FRAMES_PER_BLOCK * 2;
@@ -122,14 +128,16 @@ fn the_score_still_sounds_the_same() {
     );
 
     let actual = digest(&samples);
-    assert_eq!(
-        actual,
-        GOLDEN_DIGEST,
-        "mxm-mono-01 renders differently through the player than the committed reference.\n\
-         If the change was deliberate, listen to {} and update GOLDEN_DIGEST to {actual} in the \
-         same commit as the change that caused it.",
-        wav.display()
-    );
+    if DIGESTS_PINNED_HERE {
+        assert_eq!(
+            actual,
+            GOLDEN_DIGEST,
+            "mxm-mono-01 renders differently through the player than the committed reference.\n\
+             If the change was deliberate, listen to {} and update GOLDEN_DIGEST to {actual} in the \
+             same commit as the change that caused it.",
+            wav.display()
+        );
+    }
 }
 
 #[test]
@@ -161,10 +169,12 @@ fn the_golden_test_would_catch_a_change_in_the_sound() {
 
     score(&mut session).expect("the session advances");
 
-    assert_ne!(
-        digest(&session.captured()),
-        GOLDEN_DIGEST,
-        "closing the filter must change the render; if it does not, the digest is not measuring \
-         the audio"
-    );
+    if DIGESTS_PINNED_HERE {
+        assert_ne!(
+            digest(&session.captured()),
+            GOLDEN_DIGEST,
+            "closing the filter must change the render; if it does not, the digest is not measuring \
+             the audio"
+        );
+    }
 }
