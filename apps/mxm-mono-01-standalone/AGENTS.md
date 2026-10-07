@@ -50,7 +50,7 @@ So this crate mirrors `apps/mxm-player` (now in mxm-player): a separate member, 
 **Cargo unifies features across a single build graph**, so this is a property of *which* crates are
 built together, not a wall. `cargo build --workspace` does include this crate. The check is
 `cargo tree -p mxm-mono-01`, which must show no audio backend — run it by hand when this crate or
-the plugin's dependencies change, since CI does not run it and runs only on `v*` tags (root
+the plugin's dependencies change, since CI does not run it and runs only when started by hand (root
 *Windows, Linux and macOS*) —
 because the failure mode is silent: the bundle would still build, still load and still work, while
 carrying cpal and a libjack link into every user's DAW.
