@@ -94,21 +94,23 @@ shared coverage check runs here too — `editor::tests::the_keyboard_cursor_reac
 owed since the output level moved above the cards — and this product retains the deeper
 table-backed proof beside it.
 
-`Shift`+arrows move module/card to module/card, `Command`+arrows move inside a card, and bare arrows
-set the value — left/right fine, up/down coarse, `Command`+`Backspace` back to the default. The
-parent's *The keyboard cursor runs in every editor* owns the contract; what is local is that
-`sections::binding_for` is `pub` so a test can resolve a cursor's parameter back to its `Bound`.
+Since 2026-10-08 the keys are the kit's keyboard language (design system §11): a bare arrow moves to
+the next parameter that way inside the card, stopping on each cell of a segmented control; COARSE +
+an arrow moves card to card; VALUE + an arrow edits the parameter the cursor is on — its fine step,
+COARSE's coarse one or MICRO's finer layer, the arrow giving only the direction — as one gesture that
+OUT or letting go of a held VALUE keeps and BACK cancels; DELETE restores the default, and OPEN
+chooses the segmented cell the cursor is on. The parent's *The keyboard cursor runs in every editor*
+owns the contract; what is local is that `sections::binding_for` is `pub` so a test can resolve a
+cursor's parameter back to its `Bound`.
 
 `tests/keyboard_editing.rs` drives the real panel with real key events: that a fresh cursor lands on
-the app bar's output level (the bar is drawn before any card, so card tests walk to LFO with
-`Shift` arrows first), registration, category-first
-card order across paging, text and waveform segmented editing, the step law against each
-parameter's own `stepping`, keyboard editing after a custom control loses egui focus, one balanced
-gesture across a held continuous edit, cardless Parameters behavior, and that `Space` and the
-browser's arrows are left alone. The hierarchy was corrected after live use: the higher `Shift` key
-selects the higher module/card level, `Command` selects parameters and bare arrows edit values.
-Native synthetic keys in MXM Player proved all three tiers against loaded-plugin readback on Windows;
-**the revised feel under the owner's own hands remains the deciding manual gate.**
+the first card's first parameter (the LFO's rate, not the app bar's output level, which is drawn
+first), registration, category-first card order across paging, text and waveform segmented editing,
+the step law against each parameter's own `stepping`, FINE against COARSE, keyboard editing after a
+custom control loses egui focus, one balanced gesture across a held edit, cardless Parameters
+behavior, and that `Space` and the browser's arrows are left alone.
+
+**The feel under the owner's own hands remains the deciding manual gate.**
 
 ## Modulation routing
 

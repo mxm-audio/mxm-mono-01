@@ -74,10 +74,13 @@ editor*): with `MXM_DEV_CC` in the process environment, CC 119 selects a categor
 - `sections::ASSIGNMENT` cross-checks the painted frame's registry, beside the shared
   `editor::tests::the_keyboard_cursor_reaches_and_operates_every_parameter`; `sections::binding_for`
   is `pub` so a test can resolve a cursor's parameter back to its `Bound`.
-- `Shift`+arrows move module/card to module/card, `Command`+arrows inside a card, bare arrows set the
-  value, `Command`+`Backspace` restores the default (the parent's contract).
-- `tests/keyboard_editing.rs` drives the real panel with real key events. **The revised feel under
-  the owner's own hands remains the deciding manual gate**
+- The keys are the kit's keyboard language (design system §11, the parent's contract; every editor
+  since 2026-10-08): a bare arrow moves inside the card, COARSE + an arrow card to card, VALUE + an
+  arrow edits (FINE, or COARSE or MICRO added), OUT or letting go of VALUE keeps the edit and BACK
+  cancels it, DELETE restores the default. The cursor starts on the first card's first parameter,
+  not the app bar's output level.
+- `tests/keyboard_editing.rs` drives the real panel with real key events. **The feel under the
+  owner's own hands remains the deciding manual gate**
   ([NOTES.md § The keyboard cursor](NOTES.md#the-keyboard-cursor-has-a-product-specific-deep-proof)).
 
 ## Modulation routing

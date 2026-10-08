@@ -254,7 +254,7 @@ pub fn panel(
     // four cards took the categories' own order agrees with it.
     if *view == mxm_ui::paging::PARAMETERS {
         // This surface has no cards. Stop rather than merely hiding the outline, or its controls
-        // lose their legacy bare-arrow editing to an invisible stale musician cursor.
+        // lose their own bare-arrow editing to an invisible stale musician cursor.
         mxm_ui::navigation::stop(ui.ctx());
     } else {
         mxm_ui::navigation::paged_with_bar(ui.ctx(), nav, busy, &[OUTPUT_CARD]);
