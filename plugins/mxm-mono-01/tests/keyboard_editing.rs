@@ -26,6 +26,7 @@ use mxm_mono_01::editor::sections::{ASSIGNMENT, binding_for};
 use mxm_mono_01::editor::{PresetUi, panel, set_advanced};
 use mxm_mono_01::params::MxmMono01Params;
 use mxm_mono_01::telemetry::Telemetry;
+use mxm_plugin_test::keyboard_checks::{COARSE, OUT, VALUE, key_of};
 use nice_plug::params::{Param, internals::ParamPtr};
 use nice_plug::prelude::{ParamSetter, PluginApi, PluginState};
 
@@ -214,20 +215,20 @@ fn tap(k: Key) -> Vec<egui::Event> {
     vec![key(k, true, false), key(k, false, false)]
 }
 
-/// Keys tapped one after another, all in one frame: `taps(&[Key::W, Key::ArrowUp, Key::Tab])` is
-/// a complete fine edit.
+/// Keys tapped one after another, all in one frame: `taps(&[key_of(VALUE), Key::ArrowUp,
+/// key_of(OUT)])` is a complete fine edit.
 fn taps(keys: &[Key]) -> Vec<egui::Event> {
     keys.iter().flat_map(|&k| tap(k)).collect()
 }
 
 /// VALUE, the arrow, OUT: one fine step that way, kept.
 fn fine(arrow: Key) -> Vec<egui::Event> {
-    taps(&[Key::W, arrow, Key::Tab])
+    taps(&[key_of(VALUE), arrow, key_of(OUT)])
 }
 
 /// VALUE, COARSE, the arrow, OUT: one coarse step that way, kept.
 fn coarse(arrow: Key) -> Vec<egui::Event> {
-    taps(&[Key::W, Key::S, arrow, Key::Tab])
+    taps(&[key_of(VALUE), key_of(COARSE), arrow, key_of(OUT)])
 }
 
 /// The cursor lands on something without being aimed, so the first keystroke is never spent
@@ -356,7 +357,7 @@ fn a_held_value_edit_is_one_balanced_gesture() {
         &params,
         &host,
         vec![
-            key(Key::W, true, false),
+            key(key_of(VALUE), true, false),
             key(Key::ArrowRight, true, false),
             key(Key::ArrowRight, true, true),
         ],
@@ -390,7 +391,7 @@ fn a_held_value_edit_is_one_balanced_gesture() {
         "letting go of the arrow leaves the gesture open while VALUE is held"
     );
 
-    editor.frame(&params, &host, vec![key(Key::W, false, false)]);
+    editor.frame(&params, &host, vec![key(key_of(VALUE), false, false)]);
     assert_eq!(
         host.ends() - before_ends,
         1,
@@ -407,7 +408,7 @@ fn coarse_right_moves_to_the_card_painted_to_the_right_in_paging_order() {
     editor.settle(&params, &host);
     editor.on_the_first_card();
 
-    editor.frame(&params, &host, taps(&[Key::S, Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
     // Since the LFO, the envelope and the amplifier became one card, the painted order is the
     // section order; the shared navigation's own tests hold the case where the two differ.
     assert_eq!(
@@ -459,7 +460,7 @@ fn a_text_segmented_parameter_can_be_edited_from_the_keyboard() {
     editor.settle(&params, &host);
     editor.on_the_first_card();
 
-    editor.frame(&params, &host, taps(&[Key::S, Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
     editor.frame(&params, &host, Vec::new());
     assert_eq!(editor.nav.card(), Some(1));
     assert_eq!(editor.nav.parameter(), Some("oscrange"));
@@ -486,7 +487,7 @@ fn coarse_and_an_arrow_move_the_card_cursor_rather_than_the_value() {
     let first_card = editor.nav.card().expect("landed");
     let sets_before = host.sets();
 
-    editor.frame(&params, &host, taps(&[Key::S, Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
     editor.frame(&params, &host, Vec::new());
 
     assert_ne!(
@@ -775,7 +776,13 @@ fn two_presses_in_one_frame_are_two_octaves() {
     editor.frame(
         &params,
         &host,
-        taps(&[Key::W, Key::S, Key::ArrowUp, Key::ArrowUp, Key::Tab]),
+        taps(&[
+            key_of(VALUE),
+            key_of(COARSE),
+            Key::ArrowUp,
+            Key::ArrowUp,
+            key_of(OUT),
+        ]),
     );
     let after = params.cutoff.unmodulated_plain_value();
     assert!(
@@ -802,7 +809,7 @@ fn a_held_edit_advances_one_cent_per_repeat_while_the_host_lags() {
     for repeat in [false, true, true] {
         let mut events = Vec::new();
         if !repeat {
-            events.push(key(Key::W, true, false));
+            events.push(key(key_of(VALUE), true, false));
         }
         events.push(key(Key::ArrowRight, true, repeat));
         editor.frame(&params, &host, events);
@@ -821,7 +828,7 @@ fn a_held_edit_advances_one_cent_per_repeat_while_the_host_lags() {
         &host,
         vec![
             key(Key::ArrowRight, false, false),
-            key(Key::W, false, false),
+            key(key_of(VALUE), false, false),
         ],
     );
     host.catch_up();
