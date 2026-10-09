@@ -6,9 +6,9 @@
 //! step, and that a held key is one automation gesture rather than a hundred.
 //!
 //! The keys are the keyboard language's (design system §11, every editor since 2026-10-08), in the
-//! default keymap: a bare arrow moves the cursor inside the card, COARSE (`S`) and an arrow card to
-//! card, VALUE (`W`) and an arrow edit the parameter the cursor is on — FINE, or COARSE added — and
-//! OUT (`Tab`) or letting go of a held VALUE keeps the edit. A key tapped in sequence and a key held
+//! default keymap: a bare arrow moves the cursor inside the card, VIEW and an arrow card to card
+//! (2026-10-09), and a step key and an arrow, or VALUE's, edit the parameter the cursor is on —
+//! FINE, COARSE or MICRO — and OUT (`Tab`) or letting go of a held key keeps the edit. A key tapped in sequence and a key held
 //! in a chord are the same gesture, so most tests tap.
 //!
 //! Layout is not asserted here. Which card a knob lands on depends on the width the pack chose,
@@ -26,7 +26,7 @@ use mxm_mono_01::editor::sections::{ASSIGNMENT, binding_for};
 use mxm_mono_01::editor::{PresetUi, panel, set_advanced};
 use mxm_mono_01::params::MxmMono01Params;
 use mxm_mono_01::telemetry::Telemetry;
-use mxm_plugin_test::keyboard_checks::{COARSE, OUT, VALUE, key_of};
+use mxm_plugin_test::keyboard_checks::{COARSE, OUT, VALUE, VIEW, key_of};
 use nice_plug::params::{Param, internals::ParamPtr};
 use nice_plug::prelude::{ParamSetter, PluginApi, PluginState};
 
@@ -291,10 +291,10 @@ fn value_coarse_up_moves_the_selected_parameter_by_its_coarse_step() {
     );
 }
 
-/// Under VALUE the arrow gives only the direction — → and ↑ both go up by the same FINE step — and
-/// the size is COARSE's to change, never the arrow's. Fine is never bigger than coarse.
+/// Under VALUE ↑ goes up by the FINE step and → to the next line of it (2026-10-09), and the size
+/// is COARSE's to change, never the arrow's. Fine is never bigger than coarse.
 #[test]
-fn value_steps_fine_whichever_arrow_and_coarse_only_with_coarse() {
+fn value_steps_fine_up_snaps_fine_right_and_coarse_only_with_coarse() {
     let params = MxmMono01Params::default();
     let host = Recorder::default();
     let mut editor = Editor::new(&params);
@@ -308,7 +308,7 @@ fn value_steps_fine_whichever_arrow_and_coarse_only_with_coarse() {
                 .normalised(),
         )
     };
-    let step = |press| {
+    let step = |press: mxm_ui::control::Press| {
         let bound = binding_for(permanent(&selected), &params);
         let here = f64::from(bound.param.normalised());
         bound.param.step_from(here, press, bound.law) - here
@@ -319,12 +319,16 @@ fn value_steps_fine_whichever_arrow_and_coarse_only_with_coarse() {
         "{selected}: fine ({fine_up}) must never exceed coarse ({coarse_up})"
     );
 
-    for arrow in [Key::ArrowRight, Key::ArrowUp] {
-        let (start, fine_up) = (read(), step(FINE_UP));
+    let fine_snap = mxm_ui::control::Press {
+        snap: true,
+        ..FINE_UP
+    };
+    for (arrow, press) in [(Key::ArrowUp, FINE_UP), (Key::ArrowRight, fine_snap)] {
+        let (start, moved) = (read(), step(press));
         editor.frame(&params, &host, fine(arrow));
         assert!(
-            (read() - start - fine_up).abs() < 1e-4,
-            "VALUE + {arrow:?} is the fine step"
+            (read() - start - moved).abs() < 1e-4,
+            "VALUE + {arrow:?} is {press:?}"
         );
     }
 
@@ -358,8 +362,8 @@ fn a_held_value_edit_is_one_balanced_gesture() {
         &host,
         vec![
             key(key_of(VALUE), true, false),
-            key(Key::ArrowRight, true, false),
-            key(Key::ArrowRight, true, true),
+            key(Key::ArrowUp, true, false),
+            key(Key::ArrowUp, true, true),
         ],
     );
     assert_eq!(host.begins() - before_begins, 1, "the hold opens once");
@@ -372,7 +376,7 @@ fn a_held_value_edit_is_one_balanced_gesture() {
         "both same-frame presses contribute to the value"
     );
 
-    editor.frame(&params, &host, vec![key(Key::ArrowRight, true, true)]);
+    editor.frame(&params, &host, vec![key(Key::ArrowUp, true, true)]);
     assert_eq!(
         host.begins() - before_begins,
         1,
@@ -384,7 +388,7 @@ fn a_held_value_edit_is_one_balanced_gesture() {
         "both key-down frames set the value"
     );
 
-    editor.frame(&params, &host, vec![key(Key::ArrowRight, false, false)]);
+    editor.frame(&params, &host, vec![key(Key::ArrowUp, false, false)]);
     assert_eq!(
         host.ends() - before_ends,
         0,
@@ -401,14 +405,14 @@ fn a_held_value_edit_is_one_balanced_gesture() {
 }
 
 #[test]
-fn coarse_right_moves_to_the_card_painted_to_the_right_in_paging_order() {
+fn view_right_moves_to_the_card_painted_to_the_right_in_paging_order() {
     let params = MxmMono01Params::default();
     let host = Recorder::default();
     let mut editor = Editor::new(&params);
     editor.settle(&params, &host);
     editor.on_the_first_card();
 
-    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(VIEW), Key::ArrowRight]));
     // Since the LFO, the envelope and the amplifier became one card, the painted order is the
     // section order; the shared navigation's own tests hold the case where the two differ.
     assert_eq!(
@@ -460,7 +464,7 @@ fn a_text_segmented_parameter_can_be_edited_from_the_keyboard() {
     editor.settle(&params, &host);
     editor.on_the_first_card();
 
-    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(VIEW), Key::ArrowRight]));
     editor.frame(&params, &host, Vec::new());
     assert_eq!(editor.nav.card(), Some(1));
     assert_eq!(editor.nav.parameter(), Some("oscrange"));
@@ -475,9 +479,9 @@ fn a_text_segmented_parameter_can_be_edited_from_the_keyboard() {
     assert_eq!(host.sets() - sets, 1, "one host-visible parameter edit");
 }
 
-/// COARSE + arrows are the card cursor's, and the cursor must actually move when pressed.
+/// VIEW + arrows are the card cursor's, and the cursor must actually move when pressed.
 #[test]
-fn coarse_and_an_arrow_move_the_card_cursor_rather_than_the_value() {
+fn view_and_an_arrow_move_the_card_cursor_rather_than_the_value() {
     let params = MxmMono01Params::default();
     let host = Recorder::default();
     let mut editor = Editor::new(&params);
@@ -487,13 +491,13 @@ fn coarse_and_an_arrow_move_the_card_cursor_rather_than_the_value() {
     let first_card = editor.nav.card().expect("landed");
     let sets_before = host.sets();
 
-    editor.frame(&params, &host, taps(&[key_of(COARSE), Key::ArrowRight]));
+    editor.frame(&params, &host, taps(&[key_of(VIEW), Key::ArrowRight]));
     editor.frame(&params, &host, Vec::new());
 
     assert_ne!(
         editor.nav.card(),
         Some(first_card),
-        "COARSE + Right moves to the next card"
+        "VIEW + Right moves to the next card"
     );
     assert_eq!(
         host.sets(),
@@ -611,11 +615,13 @@ const FINE_UP: mxm_ui::control::Press = mxm_ui::control::Press {
     up: true,
     coarse: false,
     finer: false,
+    snap: false,
 };
 const COARSE_UP: mxm_ui::control::Press = mxm_ui::control::Press {
     up: true,
     coarse: true,
     finer: false,
+    snap: false,
 };
 
 /// Where a parameter's control was painted last frame, from the cursor's own registry.
@@ -732,11 +738,11 @@ fn a_dragged_knob_takes_the_next_edit_and_the_tune_steps_a_cent() {
 
     let before = params.tune.unmodulated_plain_value();
     assert!(before > 1.0, "the drag moved the tune: {before}");
-    editor.frame(&params, &host, fine(Key::ArrowRight));
+    editor.frame(&params, &host, fine(Key::ArrowUp));
     let after = params.tune.unmodulated_plain_value();
     assert!(
         (after - before - 1.0).abs() < 1e-3,
-        "VALUE + Right is one cent: {before} became {after}"
+        "VALUE + Up is one cent: {before} became {after}"
     );
 }
 
@@ -811,7 +817,7 @@ fn a_held_edit_advances_one_cent_per_repeat_while_the_host_lags() {
         if !repeat {
             events.push(key(key_of(VALUE), true, false));
         }
-        events.push(key(Key::ArrowRight, true, repeat));
+        events.push(key(Key::ArrowUp, true, repeat));
         editor.frame(&params, &host, events);
         let sent = *host.sent().last().expect("each repeat sends");
         landed.push(params.tune.preview_plain(sent));
@@ -827,7 +833,7 @@ fn a_held_edit_advances_one_cent_per_repeat_while_the_host_lags() {
         &params,
         &host,
         vec![
-            key(Key::ArrowRight, false, false),
+            key(Key::ArrowUp, false, false),
             key(key_of(VALUE), false, false),
         ],
     );

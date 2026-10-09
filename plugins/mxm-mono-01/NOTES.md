@@ -95,10 +95,10 @@ owed since the output level moved above the cards — and this product retains t
 table-backed proof beside it.
 
 Since 2026-10-08 the keys are the kit's keyboard language (design system §11): a bare arrow moves to
-the next parameter that way inside the card, stopping on each cell of a segmented control; COARSE +
-an arrow moves card to card; VALUE + an arrow edits the parameter the cursor is on — its fine step,
-COARSE's coarse one or MICRO's finer layer, the arrow giving only the direction — as one gesture that
-OUT or letting go of a held VALUE keeps and BACK cancels; DELETE restores the default, and OPEN
+the next parameter that way inside the card, stopping on each cell of a segmented control; VIEW +
+an arrow moves card to card; a step key (or VALUE) + an arrow edits the parameter the cursor is on —
+FINE's fine step, COARSE's coarse one or MICRO's finer layer, ↑ ↓ by it and ← → to the next line of
+it (2026-10-09) — as one gesture that OUT or letting go of a held key keeps and BACK cancels; DELETE restores the default, and OPEN
 chooses the segmented cell the cursor is on. The parent's *The keyboard cursor runs in every editor*
 owns the contract; what is local is that `sections::binding_for` is `pub` so a test can resolve a
 cursor's parameter back to its `Bound`.

@@ -75,9 +75,10 @@ editor*): with `MXM_DEV_CC` in the process environment, CC 119 selects a categor
   `editor::tests::the_keyboard_cursor_reaches_and_operates_every_parameter`; `sections::binding_for`
   is `pub` so a test can resolve a cursor's parameter back to its `Bound`.
 - The keys are the kit's keyboard language (design system §11, the parent's contract; every editor
-  since 2026-10-08): a bare arrow moves inside the card, COARSE + an arrow card to card, VALUE + an
-  arrow edits (FINE, or COARSE or MICRO added), OUT or letting go of VALUE keeps the edit and BACK
-  cancels it, DELETE restores the default. The cursor starts on the first card's first parameter,
+  since 2026-10-08): a bare arrow moves inside the card, VIEW + an arrow card to card, a step key
+  (or VALUE) + an arrow edits (FINE, COARSE or MICRO; ↑ ↓ by the size, ← → to the next line of it,
+  2026-10-09), OUT or letting go of a held key keeps the edit and BACK cancels it, DELETE restores
+  the default. The cursor starts on the first card's first parameter,
   not the app bar's output level.
 - `tests/keyboard_editing.rs` drives the real panel with real key events. **The feel under the
   owner's own hands remains the deciding manual gate**
