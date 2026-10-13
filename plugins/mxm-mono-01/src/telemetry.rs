@@ -31,32 +31,25 @@
 //!   because the editor has no other way to learn it.
 
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicU8, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicU8, AtomicU32, Ordering};
 
 use mxm_mono_01_dsp::envelope::Stage;
 
 /// Everything the editor may read from the audio thread.
 #[derive(Debug)]
 pub struct Telemetry {
+    /// The output level and its clip latch: the collection's one meter policy
+    /// (`mxm_telemetry::PeakMeter`).
+    pub meter: mxm_telemetry::PeakMeter,
+    /// The developer channel's requests of the editor, each taken once
+    /// (`mxm_telemetry::DevRequests`).
+    pub dev: mxm_telemetry::DevRequests,
     /// Envelope level, `0..=1`, as f32 bits.
     env_level: AtomicU32,
     /// Envelope segment, as [`Stage`] discriminant.
     env_stage: AtomicU8,
-    /// Peak `abs(sample)` since the UI last looked, as f32 bits.
-    peak: AtomicU32,
-    /// Latches on clip and stays latched until acknowledged.
-    clipped: AtomicBool,
     /// Published once per `activate`, so the editor can plot the filter at the right rate.
     sample_rate: AtomicU32,
-    /// The developer channel's requests of the editor: a view to show, and whether the expander
-    /// is open. `NO_REQUEST` when nothing is asked. See `plugins/AGENTS.md`.
-    dev_view: AtomicU8,
-    dev_disclosure: AtomicU8,
-    /// The developer channel's request to open or close the preset browser, or `NO_REQUEST`.
-    dev_browser: AtomicU8,
-    /// The developer channel's request to show a theme, by index, or `NO_REQUEST`. Theme is
-    /// interface state, so this reaches the editor and nothing else; the DSP never sees it.
-    dev_theme: AtomicU8,
     /// The host tempo in force, so a synced LFO rate reads its division.
     pub tempo: mxm_tempo::TempoCell,
 }
@@ -64,17 +57,13 @@ pub struct Telemetry {
 impl Default for Telemetry {
     fn default() -> Self {
         Self {
+            meter: mxm_telemetry::PeakMeter::new(),
+            dev: mxm_telemetry::DevRequests::new(),
             env_level: AtomicU32::new(0),
             env_stage: AtomicU8::new(stage_code(Stage::Idle)),
-            peak: AtomicU32::new(0),
-            clipped: AtomicBool::new(false),
             // A plausible default rather than zero: an editor that opened before `activate` would
             // otherwise divide by it while drawing the filter curve.
             sample_rate: AtomicU32::new(48_000f32.to_bits()),
-            dev_view: AtomicU8::new(u8::MAX),
-            dev_disclosure: AtomicU8::new(u8::MAX),
-            dev_browser: AtomicU8::new(u8::MAX),
-            dev_theme: AtomicU8::new(u8::MAX),
             tempo: mxm_tempo::TempoCell::new(),
         }
     }
@@ -100,44 +89,6 @@ impl Telemetry {
         self.env_stage.store(stage_code(stage), Ordering::Relaxed);
     }
 
-    /// Folds this block's peak in, and latches clip.
-    ///
-    /// # Max-combine, not overwrite
-    ///
-    /// The UI reads at frame rate and the audio thread writes at block rate, so most blocks are
-    /// never seen. Overwriting would make a transient visible only if it happened to land in the
-    /// block before a repaint — a meter that misses exactly the peaks it exists to show. Combining
-    /// with `max` means the value the UI eventually reads is the loudest since it last looked.
-    ///
-    /// The loop is a compare-exchange rather than a `fetch_max` because the values are f32 bits,
-    /// and integer `max` on the bit patterns is not float `max`. It is uncontended in practice —
-    /// one writer, and the reader only ever stores zero — so it does not spin.
-    pub fn publish_peak(&self, peak: f32) {
-        if !peak.is_finite() || peak <= 0.0 {
-            return;
-        }
-
-        if peak >= 1.0 {
-            self.clipped.store(true, Ordering::Relaxed);
-        }
-
-        let mut current = self.peak.load(Ordering::Relaxed);
-        loop {
-            if f32::from_bits(current) >= peak {
-                return;
-            }
-            match self.peak.compare_exchange_weak(
-                current,
-                peak.to_bits(),
-                Ordering::Relaxed,
-                Ordering::Relaxed,
-            ) {
-                Ok(_) => return,
-                Err(seen) => current = seen,
-            }
-        }
-    }
-
     /// Publishes the sample rate. Called from `activate`, not from the audio callback.
     pub fn publish_sample_rate(&self, sample_rate: f32) {
         self.sample_rate
@@ -154,29 +105,6 @@ impl Telemetry {
             f32::from_bits(self.env_level.load(Ordering::Relaxed)),
             stage_from_code(self.env_stage.load(Ordering::Relaxed)),
         )
-    }
-
-    /// The loudest sample since the last call, and resets the accumulator.
-    ///
-    /// Reset-on-read is what makes the meter mean *"loudest since you last looked"* rather than
-    /// *"loudest ever"*, which would rise once and never fall.
-    #[must_use]
-    pub fn take_peak(&self) -> f32 {
-        f32::from_bits(self.peak.swap(0, Ordering::Relaxed))
-    }
-
-    /// Whether the output has clipped since the last acknowledgement.
-    ///
-    /// Design system §5.4: *"Clip indication remains visible until acknowledged."* So this does
-    /// **not** reset on read — [`Telemetry::acknowledge_clip`] is the only way to clear it, and
-    /// that is driven by the user.
-    #[must_use]
-    pub fn clipped(&self) -> bool {
-        self.clipped.load(Ordering::Relaxed)
-    }
-
-    pub fn acknowledge_clip(&self) {
-        self.clipped.store(false, Ordering::Relaxed);
     }
 
     #[must_use]
@@ -219,55 +147,9 @@ mod tests {
         // sample rate in particular is a divisor in the filter curve.
         let telemetry = Telemetry::default();
         assert_eq!(telemetry.envelope(), (0.0, Stage::Idle));
-        assert_eq!(telemetry.take_peak(), 0.0);
-        assert!(!telemetry.clipped());
+        assert_eq!(telemetry.meter.take(), 0.0);
+        assert!(!telemetry.meter.clipped());
         assert!(telemetry.sample_rate() > 0.0);
-    }
-
-    #[test]
-    fn the_peak_survives_frames_the_ui_never_read() {
-        // The defect this prevents: a transient in a block that is not the last one before a
-        // repaint. Overwriting loses it; max-combining does not.
-        let telemetry = Telemetry::default();
-        telemetry.publish_peak(0.2);
-        telemetry.publish_peak(0.9);
-        telemetry.publish_peak(0.3);
-        assert!((telemetry.take_peak() - 0.9).abs() < 1e-6);
-    }
-
-    #[test]
-    fn reading_the_peak_resets_it() {
-        let telemetry = Telemetry::default();
-        telemetry.publish_peak(0.7);
-        assert!((telemetry.take_peak() - 0.7).abs() < 1e-6);
-        assert_eq!(telemetry.take_peak(), 0.0, "the meter would never fall");
-    }
-
-    #[test]
-    fn clip_latches_until_a_person_clears_it() {
-        // §5.4. A clip that clears itself tells you nothing a moment later, which is exactly when
-        // you look up at the meter.
-        let telemetry = Telemetry::default();
-        telemetry.publish_peak(1.5);
-        assert!(telemetry.clipped());
-
-        let _ = telemetry.take_peak();
-        telemetry.publish_peak(0.1);
-        assert!(telemetry.clipped(), "quiet audio must not clear a clip");
-
-        telemetry.acknowledge_clip();
-        assert!(!telemetry.clipped());
-    }
-
-    #[test]
-    fn a_non_finite_peak_is_ignored() {
-        // A NaN reaching the meter would poison the max-combine forever, because every comparison
-        // against NaN is false. DSP bugs happen; the display should not become the second victim.
-        let telemetry = Telemetry::default();
-        telemetry.publish_peak(0.5);
-        telemetry.publish_peak(f32::NAN);
-        telemetry.publish_peak(f32::INFINITY);
-        assert!((telemetry.take_peak() - 0.5).abs() < 1e-6);
     }
 
     #[test]
@@ -293,93 +175,5 @@ mod tests {
         let telemetry = Telemetry::default();
         telemetry.publish_envelope(0.625, Stage::Decay);
         assert_eq!(telemetry.envelope(), (0.625, Stage::Decay));
-    }
-}
-
-/// Nothing requested on a developer-channel slot.
-const NO_REQUEST: u8 = u8::MAX;
-
-/// The developer channel's requests of the editor — `plugins/AGENTS.md`, *A developer channel in
-/// every editor*. Each is taken once; the DSP reads nothing.
-impl Telemetry {
-    /// Developer category address (0–5), or Parameters (127); never a derived tab index.
-    pub fn request_view(&self, view: u8) {
-        self.dev_view
-            .store(view.min(NO_REQUEST - 1), Ordering::Relaxed);
-    }
-
-    /// The developer channel asks the editor to open or close the preset browser.
-    pub fn request_browser(&self, open: bool) {
-        self.dev_browser.store(u8::from(open), Ordering::Relaxed);
-    }
-
-    /// Whether the developer channel asked the browser open or closed since the editor last
-    /// looked, if it did.
-    pub fn take_browser_request(&self) -> Option<bool> {
-        match self.dev_browser.swap(NO_REQUEST, Ordering::Relaxed) {
-            NO_REQUEST => None,
-            open => Some(open != 0),
-        }
-    }
-
-    /// The developer channel asks the editor for a theme, by index — 0 light, 1 dark, 2 system,
-    /// as `mxm_ui::theme::from_index` reads it.
-    pub fn request_theme(&self, theme: u8) {
-        self.dev_theme
-            .store(theme.min(NO_REQUEST - 1), Ordering::Relaxed);
-    }
-
-    /// The theme the developer channel asked for since the editor last looked, if any.
-    pub fn take_theme_request(&self) -> Option<u8> {
-        match self.dev_theme.swap(NO_REQUEST, Ordering::Relaxed) {
-            NO_REQUEST => None,
-            theme => Some(theme),
-        }
-    }
-
-    /// The developer channel asks the editor to open or close its expander.
-    pub fn request_disclosure(&self, open: bool) {
-        self.dev_disclosure.store(u8::from(open), Ordering::Relaxed);
-    }
-
-    /// The view the developer channel asked for since the editor last looked, if any.
-    pub fn take_view_request(&self) -> Option<usize> {
-        match self.dev_view.swap(NO_REQUEST, Ordering::Relaxed) {
-            NO_REQUEST => None,
-            view => Some(usize::from(view)),
-        }
-    }
-
-    /// Whether the developer channel asked the expander open or closed since the editor last
-    /// looked, if it did.
-    pub fn take_disclosure_request(&self) -> Option<bool> {
-        match self.dev_disclosure.swap(NO_REQUEST, Ordering::Relaxed) {
-            NO_REQUEST => None,
-            open => Some(open != 0),
-        }
-    }
-}
-
-#[cfg(test)]
-mod developer_channel_tests {
-    use super::*;
-
-    #[test]
-    fn a_developer_request_is_taken_once() {
-        let t = Telemetry::shared();
-        assert_eq!(
-            t.take_view_request(),
-            None,
-            "nothing asked on a fresh instance"
-        );
-        t.request_view(1);
-        assert_eq!(t.take_view_request(), Some(1));
-        assert_eq!(t.take_view_request(), None, "and taking it clears it");
-        t.request_disclosure(true);
-        assert_eq!(t.take_disclosure_request(), Some(true));
-        t.request_browser(true);
-        assert_eq!(t.take_browser_request(), Some(true));
-        assert_eq!(t.take_browser_request(), None, "taken once");
-        assert_eq!(t.take_disclosure_request(), None);
     }
 }

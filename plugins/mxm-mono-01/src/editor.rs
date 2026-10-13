@@ -244,7 +244,7 @@ pub fn panel(
 
     // The collection's developer channel (`plugins/AGENTS.md`): resolve a surface request before
     // deciding who owns this frame's keyboard.
-    mxm_ui::paging::editor::developer_request(ui.ctx(), view, telemetry.take_view_request());
+    mxm_ui::paging::editor::developer_request(ui.ctx(), view, telemetry.dev.take_view());
     // One question, and both layers suspend on it: the paging renderer's `hold` and the cursor's
     // `inert` both ask whether another surface owns this frame's keyboard.
     let busy = presets.holds_the_keyboard() || text_entry.values().any(Option::is_some);
@@ -262,19 +262,19 @@ pub fn panel(
     } else {
         mxm_ui::navigation::paged_with_bar(ui.ctx(), nav, busy, &[OUTPUT_CARD]);
     }
-    if let Some(open) = telemetry.take_browser_request() {
+    if let Some(open) = telemetry.dev.take_browser() {
         presets.set_browser_open(open);
     }
     // A theme, by index. Applied and not stored: this channel is how a screenshot run and a test
     // reach a state, and neither should overwrite the choice made in the control.
-    if let Some(index) = telemetry.take_theme_request()
+    if let Some(index) = telemetry.dev.take_theme()
         && let Some(preference) = mxm_ui::theme::from_index(index)
     {
         ui.ctx().set_theme(preference);
     }
     // The Oscillator's Advanced disclosure keeps its state where its header reads and writes it:
     // egui's memory, under the shared disclosure id.
-    if let Some(open) = telemetry.take_disclosure_request() {
+    if let Some(open) = telemetry.dev.take_disclosure() {
         set_advanced(ui.ctx(), open);
     }
 
@@ -285,8 +285,13 @@ pub fn panel(
         |ui| mxm_preset::ui::preset_row(ui, &tokens, params, setter, presets),
         |ui| {
             // §3.1 slot 6. Peak is reset by the read, so this is "loudest since the last frame".
-            if mxm_ui::shell::level_meter(ui, &tokens, telemetry.take_peak(), telemetry.clipped()) {
-                telemetry.acknowledge_clip();
+            if mxm_ui::shell::level_meter(
+                ui,
+                &tokens,
+                telemetry.meter.take(),
+                telemetry.meter.clipped(),
+            ) {
+                telemetry.meter.clear_clip();
             }
 
             // §3.1 slot 6: the output control sits beside its meter, not on a card.
@@ -677,7 +682,7 @@ mod tests {
         let host = NoHost;
         let setter = ParamSetter::new(&host);
         // Advanced open, through the developer channel as a capture run would open it.
-        telemetry.request_disclosure(true);
+        telemetry.dev.request_disclosure(true);
         let mut view = 0;
         let mut entries = HashMap::new();
         let mut nav = mxm_ui::navigation::State::default();
