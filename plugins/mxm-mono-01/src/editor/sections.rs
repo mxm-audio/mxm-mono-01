@@ -159,7 +159,7 @@ fn card_binding<'a>(id: &'static str, p: &'a MxmMono01Params) -> Bound<'a> {
             "Fine pitch trim, for matching another instrument.",
         )
         .bipolar()
-        .law(mxm_preset::StepLaw::Cents),
+        .law(mxm_params::StepLaw::Cents),
         // Not on the original: the SH-101's bender had its own depth sliders, and a
         // semitones-per-deflection value is a MIDI-era addition to that idea.
         "bendrange" => Bound::new(
@@ -167,7 +167,7 @@ fn card_binding<'a>(id: &'static str, p: &'a MxmMono01Params) -> Bound<'a> {
             &p.bend_range,
             "How many semitones a full pitch-bend deflection covers.",
         )
-        .law(mxm_preset::StepLaw::Semitones),
+        .law(mxm_params::StepLaw::Semitones),
         "sawlevel" => Bound::new(
             id,
             &p.saw_level,
@@ -193,7 +193,7 @@ fn card_binding<'a>(id: &'static str, p: &'a MxmMono01Params) -> Bound<'a> {
             &p.cutoff,
             "Where the filter starts removing high frequencies.",
         )
-        .law(mxm_preset::StepLaw::Hertz),
+        .law(mxm_params::StepLaw::Hertz),
         "resonance" => Bound::new(
             id,
             &p.resonance,
@@ -831,19 +831,19 @@ pub fn binding_for<'a>(id: &'static str, p: &'a MxmMono01Params) -> Bound<'a> {
         "subtype" => Bound::new(id, &p.sub_type, "The sub-oscillator's shape and octave."),
         "tune" => Bound::new(id, &p.tune, "Fine pitch trim.")
             .bipolar()
-            .law(mxm_preset::StepLaw::Cents),
+            .law(mxm_params::StepLaw::Cents),
         "bendrange" => Bound::new(
             id,
             &p.bend_range,
             "Semitones per full pitch-bend deflection.",
         )
-        .law(mxm_preset::StepLaw::Semitones),
+        .law(mxm_params::StepLaw::Semitones),
         "sawlevel" => Bound::new(id, &p.saw_level, "Sawtooth level."),
         "pulselevel" => Bound::new(id, &p.pulse_level, "Pulse level."),
         "sublevel" => Bound::new(id, &p.sub_level, "Sub-oscillator level."),
         "noiselevel" => Bound::new(id, &p.noise_level, "Noise level."),
         "cutoff" => Bound::new(id, &p.cutoff, "Where the filter starts removing highs.")
-            .law(mxm_preset::StepLaw::Hertz),
+            .law(mxm_params::StepLaw::Hertz),
         "resonance" => Bound::new(id, &p.resonance, "Emphasis at the cutoff."),
         "outgain" => Bound::new(id, &p.output_gain, "The instrument's output level."),
         "vcasource" => Bound::new(id, &p.vca_source, "Envelope or gate shapes the volume."),

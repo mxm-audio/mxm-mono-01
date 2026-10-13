@@ -46,8 +46,10 @@ fn render(v: &mut Voice, p: &Patch, r: &Routing, n: usize) -> Vec<f32> {
     (0..n).map(|_| v.process(p, r)).collect()
 }
 
+/// Through `mxm-measure`, which reports absence for a non-finite render rather than its loudest
+/// finite sample.
 fn peak(samples: &[f32]) -> f32 {
-    samples.iter().fold(0.0f32, |m, s| m.max(s.abs()))
+    mxm_measure::level::peak(samples).expect("the render is finite")
 }
 
 /// **Nothing routed changes nothing.** The init patch renders exactly as it did before routing

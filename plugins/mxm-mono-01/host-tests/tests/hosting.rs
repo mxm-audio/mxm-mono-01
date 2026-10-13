@@ -155,6 +155,7 @@ fn mxm_mono_01_renders_bit_exactly_through_the_host() {
             sample_rate: SAMPLE_RATE,
             block_size: BLOCK,
             total_frames: TOTAL_FRAMES,
+            tempo: None,
         },
         &events(),
     )
@@ -224,6 +225,7 @@ fn repeated_load_and_teardown_cycles_stay_clean() {
                 sample_rate: SAMPLE_RATE,
                 block_size: BLOCK,
                 total_frames: BLOCK as u64 * 4,
+                tempo: None,
             },
             &events(),
         )

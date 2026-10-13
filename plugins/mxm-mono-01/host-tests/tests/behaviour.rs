@@ -16,9 +16,7 @@ const PLUGIN: &str = "dk.mxm.mxm-mono-01";
 const SAMPLE_RATE: f64 = 48_000.0;
 
 fn bundle() -> Option<(PathBuf, PathBuf)> {
-    let dir = app_harness::bundled_dir()?;
-    let file = dir.join("mxm-mono-01.clap");
-    Some((dir, file))
+    mxm_player_harness::host_test::plugin_bundle("mxm-mono-01")
 }
 
 fn session(name: &str) -> Option<Session> {
@@ -83,20 +81,7 @@ fn brightness(samples: &[f32]) -> f32 {
 /// in the range rather than a value in Hz or seconds. What it *means* is read back from the
 /// plugin's own formatting.
 fn set_param(session: &mut Session, name: &str, fraction: f64) -> String {
-    let param = session
-        .state()
-        .param(name)
-        .unwrap_or_else(|| panic!("`{name}` is not a parameter"))
-        .clone();
-    let value = param.min + fraction * (param.max - param.min);
-
-    session
-        .app()
-        .engine_mut()
-        .push_gui_event(Payload::ParamValue {
-            param_id: param.id,
-            value,
-        });
+    mxm_player_harness::host_test::push_fraction(session, name, fraction);
     session.advance_blocks(4).expect("the session advances");
 
     session

@@ -9,6 +9,8 @@ use mxm_mono_01_dsp::filter::{K_MAX, Ladder};
 
 const SR: f32 = 48_000.0;
 
+/// `f32` accumulation, kept rather than `mxm_measure::level::rms`: the gains quoted from this harness
+/// in `docs/filters/` were measured with it.
 fn rms(samples: &[f32]) -> f32 {
     (samples.iter().map(|s| s * s).sum::<f32>() / samples.len() as f32).sqrt()
 }

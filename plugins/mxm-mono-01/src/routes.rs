@@ -491,7 +491,7 @@ impl Routes {
     /// modulation became routes: a preset that did not name them would load a sound with somebody
     /// else's filter envelope still in it. `plugins/AGENTS.md`'s coverage rule is what catches that,
     /// and it can only catch it if these are in the list.
-    pub fn parameters(&self) -> Vec<(&'static str, &dyn mxm_preset::ErasedParam)> {
+    pub fn parameters(&self) -> Vec<(&'static str, &dyn mxm_params::ErasedParam)> {
         let mut out = Vec::with_capacity(TARGETS * SOURCES * 2);
         for (index, (group, ids)) in self.each().into_iter().zip(ROUTE_IDS).enumerate() {
             for (route, (amount, presence)) in group.routes(index).into_iter().zip(ids) {
@@ -674,7 +674,7 @@ mod tests {
         use mxm_mono_01_dsp::voice::{
             FILTER_ENV_OCTAVES, FILTER_LFO_OCTAVES, PWM_WIDTH_SWING, VCO_LFO_SEMITONES,
         };
-        use mxm_preset::ErasedParam;
+        use mxm_params::ErasedParam;
         let r = Routes::new();
         let cases: [(&FloatParam, f32, String); 15] = [
             (&r.pitch.lfo, 1.0, format!("{VCO_LFO_SEMITONES:+.2} st")),
@@ -761,7 +761,7 @@ mod tests {
     /// printed again, it is the same text — at amounts either side of zero, not only the round numbers.
     /// The bare percentage printed `-0` there, which parses to zero and prints `0`, and
     /// `clap-validator`'s `param-conversions` fails on that whenever its values land in the sliver
-    /// (`mxm_modulation_params::signed`).
+    /// (`mxm_params::text::signed`).
     #[test]
     fn every_reading_survives_the_hosts_round_trip_a_rounded_zero_included() {
         let routes = Routes::new();

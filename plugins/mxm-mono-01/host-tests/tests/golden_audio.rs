@@ -15,9 +15,8 @@
 //! reference in the same commit as the change that caused it. A silent update is the one thing
 //! that makes this test worthless.
 
-use mxm_player_harness::app_harness;
-
 use mxm_player::session::Session;
+use mxm_player_harness::host_test::digest;
 use std::path::PathBuf;
 
 const PLUGIN: &str = "dk.mxm.mxm-mono-01";
@@ -52,9 +51,7 @@ const DIGESTS_PINNED_HERE: bool = cfg!(target_os = "windows");
 const GOLDEN_SAMPLES: usize = 45 * mxm_player::session::FRAMES_PER_BLOCK * 2;
 
 fn bundle() -> Option<(PathBuf, PathBuf)> {
-    let dir = app_harness::bundled_dir()?;
-    let file = dir.join("mxm-mono-01.clap");
-    Some((dir, file))
+    mxm_player_harness::host_test::plugin_bundle("mxm-mono-01")
 }
 
 /// The score: two notes, one released under sustain, one plain. Fixed forever.
@@ -81,20 +78,6 @@ fn score(session: &mut Session) -> Result<(), String> {
     session.app().note_off(67);
     session.advance_blocks(19)?;
     Ok(())
-}
-
-/// A stable digest of the rendered samples, on their exact bit patterns.
-fn digest(samples: &[f32]) -> String {
-    // FNV-1a over the raw bits: no dependency, and exact — this is a bit-for-bit comparison
-    // expressed compactly, not a perceptual one.
-    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
-    for sample in samples {
-        for byte in sample.to_bits().to_le_bytes() {
-            hash ^= u64::from(byte);
-            hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
-        }
-    }
-    format!("{hash:016x}")
 }
 
 fn render_score(name: &str) -> Option<(Vec<f32>, PathBuf)> {

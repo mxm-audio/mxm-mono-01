@@ -756,30 +756,7 @@ mod tests {
     use nice_plug::params::internals::ParamPtr;
     use nice_plug::prelude::{PluginApi, PluginState};
 
-    /// A `GuiContext` that records nothing, so the panel can be laid out with no host.
-    ///
-    /// The editor reports edits through a `ParamSetter`; laying it out does not make any, so every
-    /// method here is unreachable in these tests and exists only to satisfy the trait.
-    struct NoHost;
-
-    impl nice_plug::context::gui::GuiContextInner for NoHost {
-        // A test double has no host to ask for a restart (nice-plug 0.4).
-        fn request_restart(&self) {}
-        fn plugin_api(&self) -> PluginApi {
-            PluginApi::Clap
-        }
-        unsafe fn raw_begin_set_parameter(&self, _param: ParamPtr) {}
-        unsafe fn raw_set_parameter_normalized(&self, _param: ParamPtr, _normalized: f32) {}
-        unsafe fn raw_end_set_parameter(&self, _param: ParamPtr) {}
-        fn get_state(&self) -> PluginState {
-            PluginState {
-                version: String::new(),
-                params: Default::default(),
-                fields: Default::default(),
-            }
-        }
-        fn set_state(&self, _state: PluginState) {}
-    }
+    use mxm_plugin_test::NoHost;
 
     /// A host that **applies** what a `ParamSetter` reports, which `NoHost` deliberately does not.
     ///
