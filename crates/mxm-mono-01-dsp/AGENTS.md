@@ -99,7 +99,7 @@ These apply to every per-sample path, not only to a host's `process()`:
 - No locks, no blocking channels, no file or network I/O.
 - Preallocate where the maximum size is known; `reset()` must leave **no tail** from previous
   playback.
-- **Flush denormals in the DSP itself** on every recursive state — `flush()` in `lib.rs`, applied to
+- **Flush denormals in the DSP itself** on every recursive state — `mxm_dsp::guard::flush`, applied to
   every integrator, feedback memory and delay write. Not a framework FTZ guard: it may be a no-op
   without an opt-in feature, and DSP-level flushing is what preserves exact digital silence.
 - Cap internal blocks: `min(next_event, host_end, start + MAX_BLOCK)`. Splitting only on events lets
