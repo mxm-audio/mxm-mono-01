@@ -38,7 +38,6 @@ use mxm_ui::space::SPACE_5;
 use mxm_ui::theme::Tokens;
 use nice_plug::context::gui::GuiContext;
 use nice_plug::prelude::*;
-use nice_plug_egui::{EguiEditorState, NiceEguiApp, create_egui_editor};
 
 use crate::params::MxmMono01Params;
 use crate::telemetry::Telemetry;
@@ -94,51 +93,21 @@ impl Section {
 
 /// Builds the editor. Called from `Plugin::editor`.
 pub fn create(params: Arc<MxmMono01Params>, telemetry: Arc<Telemetry>) -> Option<MxmMono01Editor> {
-    let state = EguiEditorState::from_size(
-        nice_plug::editor::dpi::LogicalSize::new(REFERENCE.0, REFERENCE.1),
-        1.0,
-    );
-
-    create_egui_editor(
-        state,
-        nice_plug_egui::RepaintNotifier::new(),
-        nice_plug_egui::EguiNiceSettings {
-            title: "mxm-mono-01".to_owned(),
-            // **Resizable, because the layout reflows.** The cards wrap into rows at whatever
-            // width the window is given, which is what a tiling window manager needs and what the
-            // old fixed frame could not do: a window of any other size could only add empty space
-            // or clip, and both happened.
-            //
-            // `preserve_aspect_ratio` stays off. It is a CLAP hint for *embedded* editors, where
-            // the host owns the window and does the constraining, and a floating window ignored it;
-            // a reflowing layout has no ratio to preserve anyway.
-            //
-            // Zoom is still **chosen, not derived** — the app bar's control. Deriving it from the
-            // window feeds back: zoom sets size, size sets zoom, and the window jitters between two
-            // writers of one value. That trap is unchanged by reflow.
-            resize_hint: ResizeHint {
-                // The floor is one card wide plus the panel's gutters: below it a card would be
-                // drawn narrower than its own controls, which no arrangement can fix.
-                size_constraints: nice_plug::editor::SizeConstraints::min_logical_size(
-                    nice_plug::editor::dpi::LogicalSize::new(MINIMUM.0 as f32, MINIMUM.1 as f32),
-                ),
-                ..ResizeHint::RESIZABLE
-            },
-            ..Default::default()
-        },
+    mxm_editor::create(
+        "mxm-mono-01",
+        REFERENCE,
+        MINIMUM,
         MxmMono01App::new(params, telemetry),
     )
 }
 
 /// The editor type the plugin exposes.
-pub type MxmMono01Editor = nice_plug_egui::EguiEditor<MxmMono01App>;
+pub type MxmMono01Editor = mxm_editor::Editor<MxmMono01App>;
 
 /// The editor's own state: what the plugin does not own, and the host does not need.
 pub struct MxmMono01App {
     params: Arc<MxmMono01Params>,
     telemetry: Arc<Telemetry>,
-    /// Set in `build`, because that is where nice-plug hands it over.
-    gui_context: Option<GuiContext>,
     /// Musician pages (0), or the developer-only Parameters surface (127).
     view: usize,
     /// Open text-entry buffers, keyed by parameter id. §7.1 requires direct text entry on every
@@ -161,7 +130,6 @@ impl MxmMono01App {
         Self {
             params,
             telemetry,
-            gui_context: None,
             view: 0,
             text_entry: HashMap::new(),
             presets: PresetUi::new(params_for_presets.as_ref()),
@@ -170,28 +138,8 @@ impl MxmMono01App {
     }
 }
 
-impl NiceEguiApp for MxmMono01App {
-    fn build(
-        &mut self,
-        egui_ctx: egui::Context,
-        nice_gui_ctx: GuiContext,
-        _frame: &mut nice_plug_egui::Frame,
-    ) -> Result<(), nice_plug_egui::baseview::HandlerError> {
-        // Once, on open. It is idempotent, and doing it here rather than per frame means the
-        // first frame is already styled — a `Ui` reads a clone of the style it was built with, so
-        // applying mid-frame would show as an unstyled flash.
-        mxm_ui::shell::install(&egui_ctx);
-        self.gui_context = Some(nice_gui_ctx);
-        Ok(())
-    }
-
-    fn ui(&mut self, ui: &mut Ui, _frame: &mut nice_plug_egui::Frame) {
-        let Some(gui_context) = self.gui_context.clone() else {
-            // No context means `build` did not run, which should be impossible. Draw nothing
-            // rather than panicking: a panic in a plugin's paint call takes the host with it.
-            return;
-        };
-
+impl mxm_editor::Panel for MxmMono01App {
+    fn ui(&mut self, ui: &mut Ui, gui_context: &GuiContext) {
         panel(
             ui,
             &self.params,
@@ -202,12 +150,6 @@ impl NiceEguiApp for MxmMono01App {
             &mut self.presets,
             &mut self.nav,
         );
-    }
-
-    fn editor_closed(&mut self) {
-        // §8: the visualizations stop when the editor is closed. Dropping the context is also what
-        // releases the host's callbacks, which nice-plug's docs ask for explicitly.
-        self.gui_context = None;
     }
 }
 
