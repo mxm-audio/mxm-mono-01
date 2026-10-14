@@ -97,7 +97,8 @@ machine: it is linear below the knee and limits firmly above it. These contracts
 - **`diode_clamp` is the deep-dive's §7 curve** — bounded by `CLAMP_KNEE` for every finite input
   (up to `f32::MAX`, where the plain formula overflows and a guard returns the knee), strictly
   increasing where the solve can land, odd, with the closed-form derivative matching a central
-  difference and a slope of exactly 1 at zero. `diode_clamp_is_bounded_monotonic_odd_and_its_derivative_is_exact`.
+  difference and a slope of exactly 1 at zero. The curve is `mxm-dsp`'s now (the audit's O1); its
+  test there, `diode_clamp_is_bounded_monotonic_odd_and_its_derivative_is_exact`, holds all of it.
 - **The threshold did not move.** Unity slope at zero means the linearised loop is the ideal ladder,
   so `k` = 3.97–4.00 at all four rates, as before. What changed is everything above it.
 - **The loop is clean below the knee and limits above it**, and that is *measurable from outside*:
@@ -134,7 +135,7 @@ settled), returning the taps, capacitor mismatch, and the input drive's shape.
 genuinely portable — it is a claim about the shipped graph, checkable with
 `cargo tree -e normal,build`.
 
-`[dependencies]` holds **`mxm-modulation` and `mxm-rng`, and nothing else**: zero dependencies of
+`[dependencies]` holds **`mxm-modulation`, `mxm-rng` and `mxm-dsp`, and nothing else**: zero dependencies of
 their own, at this same floor, so they cost the portability claim nothing. `[dev-dependencies]` holds **`mxm-measure`**,
 the collection's measurement rulers, on the same terms — a test-only edge, never in a shipped `.clap`,
 which mxm-kit's [`crates/mxm-measure/AGENTS.md`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/mxm-measure/AGENTS.md)'s verification section checks rather

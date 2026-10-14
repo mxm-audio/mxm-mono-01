@@ -12,7 +12,7 @@
 //! machine's timing impossible to reason about. Only sustain is smoothed, and that
 //! happens at the parameter layer.
 
-use crate::flush;
+use mxm_dsp::guard::flush;
 
 /// Level below which the envelope is considered finished and snaps to exactly zero.
 ///

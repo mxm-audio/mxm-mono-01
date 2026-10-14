@@ -522,7 +522,7 @@ impl Voice {
         } else {
             let coef = (-1.0 / (p.glide_time_s * fs)).exp();
             self.glide_offset =
-                crate::flush((self.glide_offset + (self.glide_target - target)) * coef);
+                mxm_dsp::guard::flush((self.glide_offset + (self.glide_target - target)) * coef);
         }
         self.glide_target = target;
         let glide = target + self.glide_offset;
@@ -621,7 +621,7 @@ impl Voice {
             amp
         };
 
-        crate::flush(filtered * amp * p.output_gain)
+        mxm_dsp::guard::flush(filtered * amp * p.output_gain)
     }
 }
 

@@ -72,8 +72,8 @@ per-note expressions ([NOTES.md § Read-only accessors](NOTES.md#read-only-acces
 Back-to-back diode clamping in the resonance feedback (`research:filters/machines/ir3109-roland.md`
 §4); numbers in [NOTES.md § The resonance saturator](NOTES.md#the-resonance-saturator-is-a-diode-clamp-and-tanh-must-not-come-back).
 
-- `diode_clamp_is_bounded_monotonic_odd_and_its_derivative_is_exact` (bounded by `CLAMP_KNEE`, slope 1
-  at zero) and `the_resonance_loop_is_clean_below_the_knee_and_limits_above_it` (`tanh` fails it).
+- `mxm-dsp`'s `diode_clamp_is_bounded_monotonic_odd_and_its_derivative_is_exact` (bounded by the knee,
+  slope 1 at zero) and `the_resonance_loop_is_clean_below_the_knee_and_limits_above_it` (`tanh` fails it).
 - **`CLAMP_KNEE` is chosen, not measured. `tanh` stays on the input as the drive** (headroom).
   **`filter::OUTPUT_BOUND` is `1 + K_MAX·CLAMP_KNEE + 2.5`.**
 - **The golden score cannot see resonance** (Init's is zero): a green golden run is no evidence.
@@ -81,7 +81,7 @@ Back-to-back diode clamping in the resonance feedback (`research:filters/machine
 
 ## Dependencies: none at runtime but the kit's dependency-free crates, and no framework types
 
-- **No *runtime* dependencies but `mxm-modulation` and `mxm-rng`** (dependency-free, same floor):
+- **No *runtime* dependencies but `mxm-modulation`, `mxm-rng` and `mxm-dsp`** (dependency-free, same floor):
   that earns the MSRV 1.87 override. Check the shipped graph with `cargo tree -e normal,build`.
 - `[dev-dependencies]` (`mxm-measure`, `mxm-audio-file`, `mxm-audio-file-decode`) never reach a `.clap`.
 - Anything that would need a dependency either does not belong here, is a dependency-free kit crate

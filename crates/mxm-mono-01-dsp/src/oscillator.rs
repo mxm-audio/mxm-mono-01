@@ -13,7 +13,8 @@
 //!   is a waveform discontinuity and an audible click, and an analog VCO does not
 //!   do it either.
 
-use crate::flush;
+use mxm_dsp::blep::{clamp_pulse_width, poly_blep};
+use mxm_dsp::guard::flush;
 use mxm_rng::Xorshift32;
 
 /// Lowest frequency the oscillator will produce.
@@ -23,24 +24,6 @@ const FREQ_MIN_HZ: f32 = 8.0;
 /// with pitch bend and LFO on top can otherwise exceed Nyquist, and PolyBLEP does
 /// not make an invalid phase increment safe.
 const NYQUIST_FRACTION: f32 = 0.45;
-
-/// PolyBLEP residual for a step discontinuity.
-///
-/// `t` is the phase in `0..1` and `dt` the per-sample phase increment. The residual
-/// corrects the two samples either side of a discontinuity, which removes most of
-/// the aliasing energy for the cost of a few operations.
-#[inline]
-fn poly_blep(t: f32, dt: f32) -> f32 {
-    if t < dt {
-        let x = t / dt;
-        x + x - x * x - 1.0
-    } else if t > 1.0 - dt {
-        let x = (t - 1.0) / dt;
-        x * x + x + x + 1.0
-    } else {
-        0.0
-    }
-}
 
 /// A free-running phase accumulator.
 #[derive(Debug, Clone, Copy, Default)]
@@ -114,18 +97,6 @@ pub fn pulse(p: &Phasor, width: f32) -> f32 {
     };
     y -= poly_blep(second, dt);
     y
-}
-
-/// Keep the two PolyBLEP corrections from overlapping.
-///
-/// Each correction spans `dt` either side of an edge, so if the pulse is narrower
-/// than `2*dt` the two would overlap and produce nonsense. At extreme frequencies
-/// where no valid width exists, fall back to a square.
-#[inline]
-pub fn clamp_pulse_width(width: f32, dt: f32) -> f32 {
-    let lo = 0.05f32.max(2.0 * dt);
-    let hi = 0.95f32.min(1.0 - 2.0 * dt);
-    if lo > hi { 0.5 } else { width.clamp(lo, hi) }
 }
 
 /// Sub-oscillator shape. The names are octaves below the main oscillator.
@@ -507,20 +478,6 @@ mod tests {
             );
             p.set_freq(-1000.0, fs);
             assert!(p.inc() > 0.0, "increment must stay positive");
-        }
-    }
-
-    #[test]
-    fn pulse_width_clamp_keeps_blep_corrections_apart() {
-        for dt in [0.0001f32, 0.01, 0.1, 0.2, 0.3, 0.45] {
-            for w in [0.0f32, 0.05, 0.5, 0.95, 1.0] {
-                let c = clamp_pulse_width(w, dt);
-                assert!((0.0..=1.0).contains(&c), "width {c} out of range");
-                if 2.0 * dt < 0.5 {
-                    assert!(c >= 2.0 * dt - 1e-6, "width {c} too narrow for dt {dt}");
-                    assert!(c <= 1.0 - 2.0 * dt + 1e-6, "width {c} too wide for dt {dt}");
-                }
-            }
         }
     }
 
