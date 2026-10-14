@@ -144,7 +144,7 @@ pub struct TargetRoutes {
 /// read as "half on" when it means "off". It reads as [`reach`] says.
 fn amount(target: usize, source: usize) -> FloatParam {
     reading::amount_param(
-        format!("{} from {}", TARGET_NAMES[target], SOURCE_NAMES[source]),
+        mxm_modulation_params::reading::amount_name(TARGET_NAMES[target], SOURCE_NAMES[source]),
         reach(target, source),
         Fader::for_offer(offer(target, source), false),
         15.0,
@@ -184,7 +184,10 @@ fn reach(target: usize, source: usize) -> Reach {
 /// safe because the depth beside it is an **amount** and starts at zero, so a revealed route is
 /// audible as nothing and is one gesture from being the machine.
 fn present(target: &str, source: &str, wired: bool) -> BoolParam {
-    BoolParam::new(format!("{target} from {source} on"), wired)
+    BoolParam::new(
+        mxm_modulation_params::reading::presence_name(target, source),
+        wired,
+    )
 }
 
 impl TargetRoutes {

@@ -177,18 +177,10 @@ impl NiceEguiApp for MxmMono01App {
         nice_gui_ctx: GuiContext,
         _frame: &mut nice_plug_egui::Frame,
     ) -> Result<(), nice_plug_egui::baseview::HandlerError> {
-        // Once, on open. Both are idempotent, and doing it here rather than per frame means the
+        // Once, on open. It is idempotent, and doing it here rather than per frame means the
         // first frame is already styled — a `Ui` reads a clone of the style it was built with, so
         // applying mid-frame would show as an unstyled flash.
-        mxm_ui::theme::apply(&egui_ctx);
-        mxm_ui::typography::apply(&egui_ctx);
-
-        // Light by default, overridable with `MXM_EDITOR_THEME`. The reasoning, and why the
-        // default is not `System`, lives on `mxm_ui::theme::preference`.
-        egui_ctx.set_theme(mxm_ui::theme::preference());
-
-        // The keys of the keymap in use, in the folder newDAWn and every MXM editor share.
-        mxm_ui::navigation::use_shared_keymap(&egui_ctx);
+        mxm_ui::shell::install(&egui_ctx);
         self.gui_context = Some(nice_gui_ctx);
         Ok(())
     }
@@ -267,11 +259,7 @@ pub fn panel(
     }
     // A theme, by index. Applied and not stored: this channel is how a screenshot run and a test
     // reach a state, and neither should overwrite the choice made in the control.
-    if let Some(index) = telemetry.dev.take_theme()
-        && let Some(preference) = mxm_ui::theme::from_index(index)
-    {
-        ui.ctx().set_theme(preference);
-    }
+    mxm_ui::shell::developer_theme(ui.ctx(), &telemetry.dev);
     // The Oscillator's Advanced disclosure keeps its state where its header reads and writes it:
     // egui's memory, under the shared disclosure id.
     if let Some(open) = telemetry.dev.take_disclosure() {
@@ -285,14 +273,7 @@ pub fn panel(
         |ui| mxm_preset::ui::preset_row(ui, &tokens, params, setter, presets),
         |ui| {
             // §3.1 slot 6. Peak is reset by the read, so this is "loudest since the last frame".
-            if mxm_ui::shell::level_meter(
-                ui,
-                &tokens,
-                telemetry.meter.take(),
-                telemetry.meter.clipped(),
-            ) {
-                telemetry.meter.clear_clip();
-            }
+            mxm_ui::shell::peak_meter(ui, &tokens, &telemetry.meter);
 
             // §3.1 slot 6: the output control sits beside its meter, not on a card.
             // A bar card, so the keyboard cursor reaches it although the paging report cannot see
