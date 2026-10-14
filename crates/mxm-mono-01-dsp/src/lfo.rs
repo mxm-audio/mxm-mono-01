@@ -8,8 +8,8 @@
 //! LFO is a modulation source rather than something you hear directly, and band
 //! limiting it would round off the very edges that make a square LFO useful.
 
-use crate::Rng;
 use crate::oscillator::Phasor;
+use mxm_rng::Xorshift32;
 
 /// Shapes, in the order they appear in the editor.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -32,7 +32,7 @@ pub struct Lfo {
     phasor: Phasor,
     /// Current sample-and-hold value, only used by [`LfoShape::Random`].
     held: f32,
-    rng: Rng,
+    rng: Xorshift32,
 }
 
 impl Default for Lfo {
@@ -51,7 +51,7 @@ impl Lfo {
         let mut lfo = Self {
             phasor: Phasor::new(),
             held: 0.0,
-            rng: Rng::new(SEED),
+            rng: Xorshift32::new(SEED),
         };
         lfo.reset();
         lfo
@@ -69,8 +69,8 @@ impl Lfo {
     /// worse one; `mxm-creative-sampler-dsp` had already got this right.
     pub fn reset(&mut self) {
         self.phasor.reset();
-        self.rng = Rng::new(SEED);
-        self.held = self.rng.next_bipolar();
+        self.rng = Xorshift32::new(SEED);
+        self.held = self.rng.bipolar_f32();
     }
 
     /// Advance one sample and return the current value in `[-1, 1]`.
@@ -108,7 +108,7 @@ impl Lfo {
         self.phasor.advance();
         // A wrap means the phase went down instead of up.
         if self.phasor.phase() < before {
-            self.held = self.rng.next_bipolar();
+            self.held = self.rng.bipolar_f32();
         }
 
         value

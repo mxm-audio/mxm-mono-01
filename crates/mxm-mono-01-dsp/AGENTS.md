@@ -79,13 +79,14 @@ Back-to-back diode clamping in the resonance feedback (`research:filters/machine
 - **The golden score cannot see resonance** (Init's is zero): a green golden run is no evidence.
 - Still open, deliberately: Q compensation, returning the taps, capacitor mismatch, the input drive's shape.
 
-## Dependencies: none at runtime, and no framework types
+## Dependencies: none at runtime but the kit's dependency-free crates, and no framework types
 
-- **No *runtime* dependencies but `mxm-modulation`** (dependency-free, same floor): that earns the
-  MSRV 1.87 override. Check the shipped graph with `cargo tree -e normal,build`.
+- **No *runtime* dependencies but `mxm-modulation` and `mxm-rng`** (dependency-free, same floor):
+  that earns the MSRV 1.87 override. Check the shipped graph with `cargo tree -e normal,build`.
 - `[dev-dependencies]` (`mxm-measure`, `mxm-audio-file`, `mxm-audio-file-decode`) never reach a `.clap`.
-- Anything that would need a dependency either does not belong here or gets written here — `Rng` in
-  `lib.rs` is the precedent ([NOTES.md § Dependencies](NOTES.md#dependencies-none-at-runtime)).
+- Anything that would need a dependency either does not belong here, is a dependency-free kit crate
+  at this floor (the generators moved to `mxm-rng`, the audit's O3), or gets written here
+  ([NOTES.md § Dependencies](NOTES.md#dependencies-none-at-runtime-but-the-kits-dependency-free-crates)).
 - No `nice_plug::` anywhere. Every public function takes plain values and a sample rate. If a
   signature would be easier with a framework type, that is a sign the logic belongs in
   `plugins/mxm-mono-01/`.
@@ -124,7 +125,7 @@ These apply to every per-sample path, not only to a host's `process()`:
 
 ## Randomness is deterministic
 
-`Rng` is seeded explicitly so every noise source is bit-repeatable. The filter's self-oscillation
+Every generator (`mxm_rng::Xorshift32`) is seeded explicitly so every noise source is bit-repeatable. The filter's self-oscillation
 excitation depends on this being testable; do not introduce an unseeded source.
 **A sample-and-hold draws its first value at `reset`, never zero** (`Lfo::new` goes through
 `Lfo::reset`; `random_is_bit_repeatable_after_reset`). Some are named `Random`, not `SampleHold`:

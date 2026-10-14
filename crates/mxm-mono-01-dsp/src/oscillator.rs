@@ -13,7 +13,8 @@
 //!   is a waveform discontinuity and an audible click, and an analog VCO does not
 //!   do it either.
 
-use crate::{Rng, flush};
+use crate::flush;
+use mxm_rng::Xorshift32;
 
 /// Lowest frequency the oscillator will produce.
 const FREQ_MIN_HZ: f32 = 8.0;
@@ -205,7 +206,7 @@ impl DcBlocker {
 pub struct Oscillator {
     main: Phasor,
     sub: Phasor,
-    noise: Rng,
+    noise: Xorshift32,
     last: Parts,
 }
 
@@ -229,7 +230,7 @@ impl Oscillator {
         Self {
             main: Phasor::new(),
             sub: Phasor::new(),
-            noise: Rng::new(0x0517_0101),
+            noise: Xorshift32::new(0x0517_0101),
             last: Parts::silent(),
         }
     }
@@ -237,7 +238,7 @@ impl Oscillator {
     pub fn reset(&mut self) {
         self.main.reset();
         self.sub.reset();
-        self.noise = Rng::new(0x0517_0101);
+        self.noise = Xorshift32::new(0x0517_0101);
         // The published parts are state a backward route reads, so a reset that left them would let
         // one render leak a sample into the next.
         self.last = Parts::silent();
@@ -265,7 +266,7 @@ impl Oscillator {
             saw: saw(&self.main),
             pulse: pulse(&self.main, pulse_width),
             sub: pulse(&self.sub, sub_shape.width()),
-            noise: self.noise.next_bipolar(),
+            noise: self.noise.bipolar_f32(),
         };
 
         self.main.advance();

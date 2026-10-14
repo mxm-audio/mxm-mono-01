@@ -3,14 +3,16 @@ name = "mxm-mono-01-dsp"
 description = "DSP for mxm-mono-01, framework-free and unit-testable"
 version.workspace = true
 edition.workspace = true
-# One dependency, itself dependency-free and at this same floor: the collection's shared routing
-# (`crates/mxm-modulation`). Genuinely portable, so this still does NOT inherit the 1.95 GUI floor.
+# Two dependencies, each dependency-free and at this same floor: the collection's shared routing
+# (`crates/mxm-modulation`) and generators (`crates/mxm-rng`). Genuinely portable, so this still does
+# NOT inherit the 1.95 GUI floor.
 rust-version = "1.87"
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
 [dependencies]
+mxm-rng.workspace = true
 mxm-modulation.workspace = true
 
 [features]

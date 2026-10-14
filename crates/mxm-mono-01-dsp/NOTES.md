@@ -127,19 +127,21 @@ Still open from the deep-dive's list, deliberately: Q compensation (the research
 whether the SH-101 has any, and this doc's own *do not fix the droop* ruling stands until that is
 settled), returning the taps, capacitor mismatch, and the input drive's shape.
 
-## Dependencies: none at runtime
+## Dependencies: none at runtime but the kit's dependency-free crates
 
-**No *runtime* dependencies, and that is what earns the MSRV 1.87 override** and makes the crate
+**No *runtime* dependencies but the kit's dependency-free crates, and that is what earns the MSRV
+1.87 override** and makes the crate
 genuinely portable — it is a claim about the shipped graph, checkable with
 `cargo tree -e normal,build`.
 
-`[dependencies]` holds **`mxm-modulation` and nothing else**: zero dependencies of its own, at this
-same floor, so it costs the portability claim nothing. `[dev-dependencies]` holds **`mxm-measure`**,
+`[dependencies]` holds **`mxm-modulation` and `mxm-rng`, and nothing else**: zero dependencies of
+their own, at this same floor, so they cost the portability claim nothing. `[dev-dependencies]` holds **`mxm-measure`**,
 the collection's measurement rulers, on the same terms — a test-only edge, never in a shipped `.clap`,
 which mxm-kit's [`crates/mxm-measure/AGENTS.md`](https://github.com/mxm-audio/mxm-kit/blob/main/crates/mxm-measure/AGENTS.md)'s verification section checks rather
 than asserts. It also holds `mxm-audio-file` and `mxm-audio-file-decode`, for the render demo's write
-and its read-back test, on the same test-only terms. Anything that would need a dependency either does not belong here or
-gets written here — `Rng` in `lib.rs` is the precedent.
+and its read-back test, on the same test-only terms. Anything that would need a dependency either does not belong here, is a
+dependency-free kit crate at this floor, or gets written here. `Rng` in `lib.rs` was the precedent
+for writing it here; it moved to `mxm-rng` when the collection's copies became one (the audit's O3).
 
 ## Numeric contracts
 

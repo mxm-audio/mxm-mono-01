@@ -141,7 +141,7 @@ breaks another is a broken change. CI builds and tests on all three, only when s
 
 | Crate | MSRV | Why |
 |---|---|---|
-| `crates/mxm-mono-01-dsp` | **1.87** | No runtime dependencies beyond `mxm-modulation`, which is itself dependency-free at this floor; framework-free and genuinely portable |
+| `crates/mxm-mono-01-dsp` | **1.87** | No runtime dependencies beyond `mxm-modulation` and `mxm-rng`, each dependency-free at this floor; framework-free and genuinely portable |
 | `plugins/mxm-mono-01` | **1.95** | Its editor pulls in egui (raised at M4b) |
 | `apps/mxm-mono-01-standalone` | **1.95** | Links the plugin, and therefore egui |
 
@@ -180,7 +180,7 @@ compared within rounding or skipped (the owner, 2026-10-06).
 
 | Doc | Scope |
 |---|---|
-| [`crates/mxm-mono-01-dsp/AGENTS.md`](crates/mxm-mono-01-dsp/AGENTS.md) | mxm-mono-01's DSP: framework-free, no runtime dependencies but the shared routing, realtime rules, numeric contracts |
+| [`crates/mxm-mono-01-dsp/AGENTS.md`](crates/mxm-mono-01-dsp/AGENTS.md) | mxm-mono-01's DSP: framework-free, no runtime dependencies but the shared routing and generators, realtime rules, numeric contracts |
 | [`plugins/AGENTS.md`](plugins/AGENTS.md) | Shared plugin conventions: nice-plug, the init patch, presets, `process()` rules, the editor contract, and installing a bundle in a DAW |
 | [`plugins/mxm-mono-01/AGENTS.md`](plugins/mxm-mono-01/AGENTS.md) | mxm-mono-01's permanent identifiers, presets, editor |
 | [`apps/mxm-mono-01-standalone/AGENTS.md`](apps/mxm-mono-01-standalone/AGENTS.md) | The standalone harness: why it is a separate crate, and what running the editor there does and does not prove |
