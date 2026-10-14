@@ -29,7 +29,7 @@ The rules that keep this from becoming a hole in the crate's independence:
   A UI thread must never call them — `Voice` is `&mut`-owned by the processor, and sharing it would
   need a lock the audio callback then has to take.
 - **The transport is not this crate's business.** `plugins/mxm-mono-01/src/telemetry.rs` owns it, and
-  this crate stays framework-free and zero-dependency.
+  this crate stays framework-free, with no dependency beyond the kit's dependency-free crates.
 - **This is not a licence to add outputs.** A new accessor needs the same *shape* of argument the
   envelope one had: something outside this crate must do its job, the value it needs exists only in
   here, and there is no other source.
