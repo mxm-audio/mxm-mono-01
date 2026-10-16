@@ -24,6 +24,7 @@ its `editor/{binding, sections, visuals}.rs`. Its licence is the repository's ro
 | What | Value |
 |---|---|
 | `CLAP_ID` | `dk.mxm.mxm-mono-01` — assembled from `plugin_name!` in `src/lib.rs`, **not** from `CARGO_PKG_NAME` |
+| `VST3_CLASS_ID` | `VST3_CLASS_ID` in `src/lib.rs`, the CLAP id's hash written out |
 | Parameter `#[id]`s | see `src/params.rs` and `src/routes.rs`; **22 of its own plus 88 routing pairs, all permanent**. `lfosync` (2026-09-25) is the newest. It was 27 until the six that named the machine's own modulation became routes — the only retirements this instrument has, each an owner decision under plan 1.13 |
 
 **`CLAP_ID` has been changed once, and will not be again**: user presets, favourites and saved locks
