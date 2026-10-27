@@ -41,8 +41,13 @@ impl mxm_preset::Instrument for MxmMono01Params {
         &self.preset
     }
 
-    fn factory_files(&self) -> &'static [(&'static str, &'static str)] {
+    /// The installed set, but in a unit test, which is loaded from no bundle: the repository's.
+    #[cfg(test)]
+    fn factory_files(&self) -> Vec<(String, String)> {
         FACTORY_FILES
+            .iter()
+            .map(|(name, json)| ((*name).to_owned(), (*json).to_owned()))
+            .collect()
     }
 
     fn default_missing_legacy_parameter(&self, id: &str) -> bool {
@@ -50,68 +55,22 @@ impl mxm_preset::Instrument for MxmMono01Params {
     }
 }
 
-/// The factory set, compiled in.
-///
-/// **Five files, and Init is not one of them** — see [`Preset::init`]. These five are *content*: a
-/// sound nobody can read is a sound nobody can learn from, so they are files rather than code.
-pub const FACTORY_FILES: &[(&str, &str)] = &[
-    ("Plucked bass", include_str!("../presets/plucked-bass.json")),
-    ("Sub bass", include_str!("../presets/sub-bass.json")),
-    ("Deep sub", include_str!("../presets/deep-sub.json")),
-    ("Rubber bass", include_str!("../presets/rubber-bass.json")),
-    ("Growl bass", include_str!("../presets/growl-bass.json")),
-    ("Round bass", include_str!("../presets/round-bass.json")),
-    ("Acid line", include_str!("../presets/acid-line.json")),
-    ("Pick bass", include_str!("../presets/pick-bass.json")),
-    ("Hollow lead", include_str!("../presets/hollow-lead.json")),
-    ("Bright lead", include_str!("../presets/bright-lead.json")),
-    ("Square lead", include_str!("../presets/square-lead.json")),
-    ("Glide lead", include_str!("../presets/glide-lead.json")),
-    ("Octave lead", include_str!("../presets/octave-lead.json")),
-    ("Vibrato lead", include_str!("../presets/vibrato-lead.json")),
-    ("Reed lead", include_str!("../presets/reed-lead.json")),
-    ("Whistle lead", include_str!("../presets/whistle-lead.json")),
-    (
-        "Screaming lead",
-        include_str!("../presets/screaming-lead.json"),
-    ),
-    ("Soft pad", include_str!("../presets/soft-pad.json")),
-    ("Warm pad", include_str!("../presets/warm-pad.json")),
-    ("Glass pad", include_str!("../presets/glass-pad.json")),
-    ("Breath pad", include_str!("../presets/breath-pad.json")),
-    ("Sweep pad", include_str!("../presets/sweep-pad.json")),
-    ("Dark pad", include_str!("../presets/dark-pad.json")),
-    ("String pad", include_str!("../presets/string-pad.json")),
-    ("Choir pad", include_str!("../presets/choir-pad.json")),
-    ("Drone", include_str!("../presets/drone.json")),
-    ("Swell", include_str!("../presets/swell.json")),
-    ("Wood pluck", include_str!("../presets/wood-pluck.json")),
-    ("Harp", include_str!("../presets/harp.json")),
-    ("Marimba", include_str!("../presets/marimba.json")),
-    ("Clav", include_str!("../presets/clav.json")),
-    ("Bell", include_str!("../presets/bell.json")),
-    (
-        "Electric piano",
-        include_str!("../presets/electric-piano.json"),
-    ),
-    ("Organ", include_str!("../presets/organ.json")),
-    ("Music box", include_str!("../presets/music-box.json")),
-    ("Brass", include_str!("../presets/brass.json")),
-    ("Cello", include_str!("../presets/cello.json")),
-    ("Violin", include_str!("../presets/violin.json")),
-    ("Noise sweep", include_str!("../presets/noise-sweep.json")),
-    ("Wind", include_str!("../presets/wind.json")),
-    ("Rain", include_str!("../presets/rain.json")),
-    ("Siren", include_str!("../presets/siren.json")),
-    ("Laser", include_str!("../presets/laser.json")),
-    ("Kick", include_str!("../presets/kick.json")),
-    ("Snare", include_str!("../presets/snare.json")),
-    ("Hat", include_str!("../presets/hat.json")),
-    ("Tom", include_str!("../presets/tom.json")),
-    ("Blip", include_str!("../presets/blip.json")),
-    ("Pulse gate", include_str!("../presets/pulse-gate.json")),
-    ("Ramp sweep", include_str!("../presets/ramp-sweep.json")),
-];
+/// The factory set as it ships, `(name, json)` in its order: the repository's `presets/`, which
+/// is installed beside the plugin and read there (`mxm_preset::installed_factory_dir`). For the
+/// tests, the integration tests and the audits, which are loaded from no bundle; the plugin itself
+/// never reads it.
+pub static FACTORY_FILES: std::sync::LazyLock<Vec<(&'static str, &'static str)>> =
+    std::sync::LazyLock::new(|| {
+        let folder = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("presets");
+        mxm_preset::read_factory_dir(&folder)
+            .into_iter()
+            .map(|(file, json)| {
+                let name = mxm_preset::Preset::parse(&json, crate::CLAP_ID)
+                    .map_or(file, |preset| preset.name);
+                (&*String::leak(name), &*String::leak(json))
+            })
+            .collect()
+    });
 
 #[cfg(test)]
 mod tests {
@@ -1274,7 +1233,7 @@ mod tests {
         //
         // The rule is about the *lowest audible source*: a preset whose sub is buried under a saw
         // still has the saw to be heard by, and one whose sub is the only voice does not.
-        for (name, text) in FACTORY_FILES {
+        for (name, text) in FACTORY_FILES.iter() {
             let preset = Preset::parse(text, crate::CLAP_ID).expect("parses");
             let below = octaves_below_the_key(&preset);
             assert!(
@@ -1289,7 +1248,7 @@ mod tests {
     fn every_factory_preset_has_something_that_sounds() {
         // A preset with every level at zero loads, reports nothing wrong, and is silent — which
         // reads as the instrument being broken rather than the preset being empty.
-        for (name, text) in FACTORY_FILES {
+        for (name, text) in FACTORY_FILES.iter() {
             let preset = Preset::parse(text, crate::CLAP_ID).expect("parses");
             let v = |id: &str| preset.params.get(id).map_or(0.0, |value| value.v);
             assert!(
@@ -1320,7 +1279,7 @@ mod tests {
         // A sound is saved with its category (the owner's rule, 2026-09-04), and the factory set
         // is where a person first sees what the categories mean. *Uncategorised* is for files
         // written before the field existed, not for sounds this instrument ships.
-        for (name, text) in FACTORY_FILES {
+        for (name, text) in FACTORY_FILES.iter() {
             let preset = Preset::parse(text, crate::CLAP_ID).expect("parses");
             assert_ne!(
                 preset.category,
@@ -1334,7 +1293,7 @@ mod tests {
     fn every_factory_preset_parses_and_is_for_this_instrument() {
         // A malformed factory preset is a build mistake, not a user's, so it is caught here rather
         // than skipped quietly in the browser.
-        for (name, text) in FACTORY_FILES {
+        for (name, text) in FACTORY_FILES.iter() {
             let preset = Preset::parse(text, crate::CLAP_ID)
                 .unwrap_or_else(|e| panic!("factory preset {name:?} does not parse: {e}"));
             assert_eq!(preset.name, *name, "the file's name must match its listing");
@@ -1346,7 +1305,7 @@ mod tests {
         // The one that catches a factory preset written before a parameter existed: it would load
         // and quietly leave that parameter wherever the last patch left it.
         let params = params();
-        for (name, text) in FACTORY_FILES {
+        for (name, text) in FACTORY_FILES.iter() {
             let preset = Preset::parse(text, crate::CLAP_ID).expect("parses");
             let (_, problems) = preset.resolve(&params);
             assert!(
