@@ -37,8 +37,8 @@ the Filter, amplitude on the Amplifier.
 
 ## Presets
 
-Fifty factory sounds, installed with the plugin as files: `mxm-mono-01.presets/` beside the `.clap`,
-and inside the `.vst3`. Any CLAP host lists and loads them too. **Init is not a file**: it is
+Fifty factory sounds, installed with the plugin as files, in its version's folder under the local data
+directory. Any CLAP host lists and loads them too. **Init is not a file**: it is
 generated from the parameter defaults, so it cannot be deleted and cannot drift from them. Your own
 presets are saved as readable JSON under the platform config directory, browsed from the same bar,
 and can be starred to sort first.
